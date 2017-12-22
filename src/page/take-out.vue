@@ -140,31 +140,3 @@ export default {
   }
 }
 </script>
-
-<style lang="less" scoped>
-  // .header {
-  //   width: 100%;
-  //   background-color: #0f96e4;
-  //   .geolocation {
-  //     span {
-  //       color: #fff;
-  //     }
-  //   }
-  //   .weather {
-  //     span: {
-  //       color: #fff;
-  //     }
-  //   }
-  //   .search {
-  //     input {
-  //       display: block;
-  //       color: rgb(80, 80, 80);
-  //       background-color: #fff;
-  //       width: 90%;
-  //       height: .25rem;
-  //       margin: 0 auto;
-  //       border: 1px solid rgb(161, 161, 161);
-  //     }
-  //   }
-  // }
-</style>
