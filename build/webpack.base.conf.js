@@ -74,11 +74,7 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
-      },
-      // {
-      //   test: /\.(scss|css)$/,
-      //   use: ['style-loader', 'css-loader', 'sass-loader']
-      // }
+      }
     ]
   },
   node: {
@@ -92,8 +88,5 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty'
-  },
-  externals: {
-    'BMap': 'BMap'
   }
 }
