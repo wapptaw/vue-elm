@@ -16,20 +16,23 @@
       </div>
     </header>
     <nav class="nav">
-      <ul
-        :style="{left: position1, transition: trans}"
-        @click = "menuSlideLeft"
-        @transitionend = "transEnd1"
-        class="foodNav">
-        <router-link
-          to=""
-          tag="li"
-          v-for="item in foodClass[index]"
-          :key="item.id">
-          <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-          <p>{{ item.title }}</p>
-        </router-link>
-      </ul>
+      <v-touch
+        @swipeleft="menuSlideLeft"
+        @swiperight="menuSlideRight">
+        <ul  
+          :style="{left: position1, transition: trans}"
+          @transitionend = "transEnd1"
+          class="foodNav">
+          <router-link
+            to=""
+            tag="li"
+            v-for="item in foodClass[index]"
+            :key="item.id">
+            <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+            <p>{{ item.title }}</p>
+          </router-link>
+        </ul>
+      </v-touch>
       <ul
         v-if="visible"
         :style="{left: position2, transition: trans}"
@@ -52,7 +55,9 @@
         </li>
       </ul>
     </nav>
-    <div></div>
+    <div>
+      <shop-list :geohash="geohash"></shop-list>
+    </div>
     <footer></footer>
   </div>
 </template>
@@ -61,9 +66,15 @@
 import { mapState, mapMutations } from 'vuex'
 import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
 import { imgBaseUrl } from '../config/url'
+import ShopList from '../components/common/ShopList'
 
 export default {
-  name: 'take-out',
+  name: 'TakeOut',
+
+  components: {
+    ShopList
+  },
+
   data () {
     return {
       failure: '',
@@ -85,7 +96,7 @@ export default {
   },
 
   computed: {
-    geo () {
+    geohash () {
       return `${this.latitude},${this.longitude}`
     },
 
@@ -124,7 +135,7 @@ export default {
   },
 
   watch: {
-    geo (val) {
+    geohash (val) {
       this.addressGet(val)
       this.weatherGet(val)
     }
@@ -132,9 +143,9 @@ export default {
 
   mounted () {
     this.getGeo()
-    this.addressGet(this.geo)
-    this.weatherGet(this.geo)
-    this.msiteFoodTypesGet(this.geo)
+    this.addressGet(this.geohash)
+    this.weatherGet(this.geohash)
+    this.msiteFoodTypesGet(this.geohash)
   },
 
   methods: {
@@ -173,16 +184,16 @@ export default {
       }
     },
 
-    addressGet (geo) {
-      getAddress(geo).then(response => {
+    addressGet (geohash) { // 具体地址获取
+      getAddress(geohash).then(response => {
         this.address = response.result.formatted_address
       }).catch(e => {
         throw new Error(e)
       })
     },
 
-    weatherGet (geo) {
-      getWeather(geo).then(response => {
+    weatherGet (geohash) { // 天气获取
+      getWeather(geohash).then(response => {
         this.weather.cond_txt = response.HeWeather6[0].now.cond_txt
         this.weather.temp = response.HeWeather6[0].now.tmp
       }).catch(e => {
@@ -190,13 +201,13 @@ export default {
       })
     },
 
-    msiteFoodTypesGet (geo) {
-      msiteFoodTypes(geo).then(response => {
+    msiteFoodTypesGet (geohash) {  // 食物分类列表
+      msiteFoodTypes(geohash).then(response => {
         this.msite = response
       })
     },
 
-    menuSlideLeft () {
+    menuSlideLeft () { // 左滑事件
       if (this.index < 1) {
         this.position1 = '-100%'
         this.trans = 'left 1s ease'
@@ -209,7 +220,7 @@ export default {
       }
     },
 
-    menuSlideRight () { // 添加事件
+    menuSlideRight () { // 右滑事件
       if (this.index > 0) {
         this.position1 = '100%'
         this.trans = 'left 1s ease'
@@ -222,13 +233,13 @@ export default {
       }
     },
 
-    transEnd1 () {
+    transEnd1 () { // 滑动结束事件
       this.position1 = 0
       this.trans = 'left 0s ease'
       this.index = this.transIndex
     },
 
-    transEnd2 () {
+    transEnd2 () { // 滑动结束事件
       this.visible = false
     },
 
@@ -286,6 +297,7 @@ export default {
   .nav {
     position: relative;
     border: 1px solid rgba(0, 0, 0, 0);
+    overflow: hidden;
   }
   .foodNav {
     width: 100%;

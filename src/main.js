@@ -4,8 +4,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store/'
+import VueTouch from 'vue-touch'
+// import {test} from './service/getData'
 
-// import {msiteFoodTypes} from './service/getData'
+Vue.use(VueTouch, {name: 'v-touch'})
 
 Vue.config.productionTip = false
 
@@ -18,4 +20,6 @@ new Vue({
   components: { App }
 })
 
-// console.log(msiteFoodTypes())
+// test().then(res => {
+//   console.log(res)
+// })
