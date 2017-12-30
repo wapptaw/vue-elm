@@ -1,64 +1,84 @@
 <template>
   <div>
-    <header class="header">
-      <div class="geolocation">
-        <span v-if="locationFailure">{{ failure }}</span>
-        <span v-else>{{ address }}</span>
-      </div>
-      <div class="weather">
-        <span>{{ weather.cond_txt }}</span>
-        <span>{{ weather.temp }}</span>
-      </div>
-      <div class="search">
+    <div
+      v-scroll="{up: wrap1Up, down: wrap1Down}"
+      class="wrap1"
+      :style="{height: heightWrap1}">
+      <header
+        class="header">
+        <div class="geolocation">
+          <span v-if="loading">定位中...</span>
+          <span v-else-if="locationFailure">{{ failure }}</span>
+          <span v-else>{{ address }}</span>
+        </div>
+        <div class="weather">
+          <span>{{ weather.cond_txt }}</span>
+          <span>{{ weather.temp }}</span>
+        </div>
+      </header>
+      <div
+        class="search limit"
+        :style="{height: searchHeight}">
         <router-link to="">
           <input type="button" value="开始寻找美食">
         </router-link>
       </div>
-    </header>
-    <nav class="nav">
-      <v-touch
-        @swipeleft="menuSlideLeft"
-        @swiperight="menuSlideRight">
-        <ul  
-          :style="{left: position1, transition: trans}"
-          @transitionend = "transEnd1"
-          class="foodNav">
-          <router-link
-            to=""
-            tag="li"
-            v-for="item in foodClass[index]"
-            :key="item.id">
-            <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-            <p>{{ item.title }}</p>
-          </router-link>
-        </ul>
-      </v-touch>
-      <ul
-        v-if="visible"
-        :style="{left: position2, transition: trans}"
-        @transitionend = "transEnd2"
-        class="foodNav">
-        <router-link
-          to=""
-          tag="li"
-          v-for="item in foodClass[transIndex]"
-          :key="item.id">
-          <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-          <p>{{ item.title }}</p>
-        </router-link>
-      </ul>
-      <ul class="mark">
-        <li
-          v-for="(item, key) in mark" 
-          :key="key"
-          :style="{backgroundColor: item.color}">
-        </li>
-      </ul>
-    </nav>
-    <div>
-      <shop-list :geohash="geohash"></shop-list>
+      <div
+        v-scroll="{up: wrap2Up, down: wrap2Down}"
+        class="wrap2"
+        :style="{height: heightWrap2, overflowY: overflowYWrap2}">
+        <nav class="nav">
+          <v-touch
+            @swipeleft="menuSlideLeft"
+            @swiperight="menuSlideRight"
+            :swipe-options="{direction: 'horizontal', threshold: 100}"
+            :enabled="true">
+            <ul  
+              :style="{left: position1, transition: trans}"
+              @transitionend = "transEnd1"
+              class="foodNav">
+              <router-link
+                to=""
+                tag="li"
+                v-for="item in msite1"
+                :key="item.id">
+                <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+                <p>{{ item.title }}</p>
+              </router-link>
+            </ul>
+          </v-touch>
+          <ul
+            v-if="visible"
+            :style="{left: position2, transition: trans}"
+            @transitionend = "transEnd2"
+            class="foodNav">
+            <router-link
+              to=""
+              tag="li"
+              v-for="item in msite2"
+              :key="item.id">
+              <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+              <p>{{ item.title }}</p>
+            </router-link>
+          </ul>
+          <ul class="mark">
+            <li
+              v-for="(item, key) in mark" 
+              :key="key"
+              :style="{backgroundColor: item.color}">
+            </li>
+          </ul>
+        </nav>
+        <div
+          class="shopList limit" 
+          :style="{height: shopListHeight}">
+          <shop-list :geohash="geohash"></shop-list>
+        </div>
+      </div>
     </div>
-    <footer></footer>
+    <footer
+      class="footer"
+      :style="{height: footerHeight}"></footer>
   </div>
 </template>
 
@@ -67,6 +87,7 @@ import { mapState, mapMutations } from 'vuex'
 import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
 import { imgBaseUrl } from '../config/url'
 import ShopList from '../components/common/ShopList'
+import { switchRem } from '../config/rem'
 
 export default {
   name: 'TakeOut',
@@ -79,7 +100,8 @@ export default {
     return {
       failure: '',
       address: '',
-      locationFailure: true,
+      locationFailure: false,
+      loading: true,
       weather: {
         cond_txt: '',
         temp: ''
@@ -91,7 +113,14 @@ export default {
       visible: false,
       position1: 0,
       position2: '100%',
-      trans: ''
+      trans: '',
+      clientHeight: '',
+      footerHeight: '.5rem',
+      searchHeight: '.7rem',
+      overflowYWrap1: 'auto',
+      overflowYWrap2: 'auto',
+      heightWrap2: '',
+      shopListHeight: ''
     }
   },
 
@@ -101,18 +130,11 @@ export default {
     },
 
     msite1 () {
-      return this.msite.slice(0, 8)
+      return this.msite.slice(this.index * 8, this.index * 8 + 8)
     },
 
     msite2 () {
-      return this.msite.slice(8, 16)
-    },
-
-    foodClass () {
-      return [
-        this.msite1,
-        this.msite2
-      ]
+      return this.msite.slice(this.transIndex * 8, this.transIndex * 8 + 8)
     },
 
     transIndex () {
@@ -126,6 +148,14 @@ export default {
       }
       mark[this.index].color = '#29f8d6'
       return mark
+    },
+
+    heightWrap1 () {
+      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
+    },
+
+    heightCompute () {
+      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight) - switchRem(this.searchHeight)}rem`
     },
 
     ...mapState([
@@ -146,6 +176,7 @@ export default {
     this.addressGet(this.geohash)
     this.weatherGet(this.geohash)
     this.msiteFoodTypesGet(this.geohash)
+    this.clientHeightGet()
   },
 
   methods: {
@@ -160,6 +191,7 @@ export default {
     showPosition (position) { // 获取经纬度和地址
       const latitude = position.coords.latitude
       const longitude = position.coords.longitude
+      this.loading = false
       this.locationFailure = false
       this.geoGet({
         latitude,
@@ -171,15 +203,23 @@ export default {
       switch (error.code) {
         case error.PERMISSION_DENIED:
           this.failure = '定位失败,用户拒绝请求地理定位'
+          this.loading = false
+          this.locationFailure = true
           break
         case error.POSITION_UNAVAILABLE:
           this.failure = '定位失败,位置信息是不可用'
+          this.loading = false
+          this.locationFailure = true
           break
         case error.TIMEOUT:
           this.failure = '定位失败,请求获取用户位置超时'
+          this.loading = false
+          this.locationFailure = true
           break
         case error.UNKNOWN_ERROR:
           this.failure = '定位失败,定位系统失效'
+          this.loading = false
+          this.locationFailure = true
           break
       }
     },
@@ -243,8 +283,30 @@ export default {
       this.visible = false
     },
 
+    clientHeightGet () { // 获取屏幕高度
+      this.clientHeight = `${document.documentElement.clientHeight}px`
+      this.clientHeightSave(this.clientHeight)
+    },
+
+    wrap1Up () { // wrap1上划
+      this.heightWrap2 = this.heightCompute
+    },
+
+    wrap1Down () { // wrap1下划
+      this.heightWrap2 = 'auto'
+    },
+
+    wrap2Up () {
+      this.shopListHeight = this.heightCompute // 有点问题
+    },
+
+    wrap2Down () {
+
+    },
+
     ...mapMutations([
-      'geoGet'
+      'geoGet',
+      'clientHeightSave'
     ])
   }
 }
@@ -253,45 +315,51 @@ export default {
 <style lang="scss" scoped>
   .header {
     width: 100%;
-    height: 1rem;
+    height: .4rem;
     padding: 0 2%;
     box-sizing: border-box;
     background-color: #0f96e4;
     font-size: 0;
     .geolocation {
-      display: inline-block;
-      width: 80%;
-      text-align: left;
-      margin-top: .1rem;
+      float: left;
+      width: 70%;
       span {
+        display: inline-block;
+        width: 100%;
         font-size: .16rem;
+        line-height: .4rem;
         color: #1f1f1f;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
       }
     }
     .weather {
-      display: inline-block;
-      width: 20%;
-      text-align: right;
-      margin-top: .1rem;
+      float: right;
       span {
+        line-height: .4rem;
         font-size: .16rem;
         color: #1f1f1f;
       }
     }
-    .search {
-      margin-top: .1rem;
-      input {
-        display: block;
-        color: rgb(80, 80, 80);
-        background-color: #fff;
-        width: 100%;
-        height: .4rem;
-        margin: 0 auto;
-        border: 1px solid #a1a1a1;
-        text-align: center;
-        font-size: .18rem;
-        border-radius: 5px;
-      }
+  }
+  .search {
+    padding: 0 .05rem;
+    padding-bottom: .2rem;
+    padding-top: .1rem;
+    background-color: #0f96e4;
+    box-sizing: border-box;
+    input {
+      display: block;
+      color: rgb(80, 80, 80);
+      background-color: #fff;
+      width: 100%;
+      height: .4rem;
+      margin: 0 auto;
+      border: 1px solid #a1a1a1;
+      text-align: center;
+      font-size: .18rem;
+      border-radius: 5px;
     }
   }
   .nav {
@@ -332,5 +400,18 @@ export default {
       background-color: #bdfdf2;
       margin: 0 .05rem;
     }
+  }
+  .wrap1 {
+    overflow-y: auto;
+  }
+  .wrap2 {
+    overflow-y: auto;
+  }
+  .shopList {
+    overflow-y: auto;
+  }
+  .footer {
+    width: 100%;
+    background-color: #000;
   }
 </style>

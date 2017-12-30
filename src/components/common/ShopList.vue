@@ -103,7 +103,7 @@ export default {
     return {
       offset: 0,
       listDate: '',
-      imgBaseUrl2,
+      imgBaseUrl2
     }
   },
 
