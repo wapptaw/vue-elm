@@ -8,7 +8,8 @@ Vue.use(Vuex)
 
 const state = {
   latitude: '39.915', // 当前纬度
-  longitude: '116.404' // 当前经度
+  longitude: '116.404', // 当前经度
+  clientHeight: '' // 屏幕高度
 }
 
 export default new Vuex.Store({
