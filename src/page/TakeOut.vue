@@ -1,80 +1,71 @@
 <template>
   <div>
+    <header
+      class="header"
+      :style="{height: headerHeight, marginTop: headerMarginTop}">
+      <div class="geolocation">
+        <span v-if="loading">定位中...</span>
+        <span v-else-if="locationFailure">{{ failure }}</span>
+        <span v-else>{{ address }}</span>
+      </div>
+      <div class="weather">
+        <span>{{ weather.cond_txt }}</span>
+        <span>{{ weather.temp }}</span>
+      </div>
+    </header>
     <div
-      v-scroll="{up: wrap1Up, down: wrap1Down}"
-      class="wrap1"
-      :style="{height: heightWrap1}">
-      <header
-        class="header">
-        <div class="geolocation">
-          <span v-if="loading">定位中...</span>
-          <span v-else-if="locationFailure">{{ failure }}</span>
-          <span v-else>{{ address }}</span>
-        </div>
-        <div class="weather">
-          <span>{{ weather.cond_txt }}</span>
-          <span>{{ weather.temp }}</span>
-        </div>
-      </header>
-      <div
-        class="search limit"
-        :style="{height: searchHeight}">
-        <router-link to="">
-          <input type="button" value="开始寻找美食">
+      class="search"
+      :style="{height: searchHeight}">
+      <router-link to="">
+        <input type="button" value="开始寻找美食">
+      </router-link>
+    </div>
+    <nav class="nav">
+      <v-touch
+        @swipeleft="menuSlideLeft"
+        @swiperight="menuSlideRight"
+        :swipe-options="{direction: 'horizontal', threshold: 100}"
+        :enabled="true">
+        <ul  
+          :style="{left: position1, transition: trans}"
+          @transitionend = "transEnd1"
+          class="foodNav">
+          <router-link
+            to=""
+            tag="li"
+            v-for="item in msite1"
+            :key="item.id">
+            <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+            <p>{{ item.title }}</p>
+          </router-link>
+        </ul>
+      </v-touch>
+      <ul
+        v-if="visible"
+        :style="{left: position2, transition: trans}"
+        @transitionend = "transEnd2"
+        class="foodNav">
+        <router-link
+          to=""
+          tag="li"
+          v-for="item in msite2"
+          :key="item.id">
+          <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+          <p>{{ item.title }}</p>
         </router-link>
-      </div>
-      <div
-        v-scroll="{up: wrap2Up, down: wrap2Down}"
-        class="wrap2"
-        :style="{height: heightWrap2, overflowY: overflowYWrap2}">
-        <nav class="nav">
-          <v-touch
-            @swipeleft="menuSlideLeft"
-            @swiperight="menuSlideRight"
-            :swipe-options="{direction: 'horizontal', threshold: 100}"
-            :enabled="true">
-            <ul  
-              :style="{left: position1, transition: trans}"
-              @transitionend = "transEnd1"
-              class="foodNav">
-              <router-link
-                to=""
-                tag="li"
-                v-for="item in msite1"
-                :key="item.id">
-                <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-                <p>{{ item.title }}</p>
-              </router-link>
-            </ul>
-          </v-touch>
-          <ul
-            v-if="visible"
-            :style="{left: position2, transition: trans}"
-            @transitionend = "transEnd2"
-            class="foodNav">
-            <router-link
-              to=""
-              tag="li"
-              v-for="item in msite2"
-              :key="item.id">
-              <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-              <p>{{ item.title }}</p>
-            </router-link>
-          </ul>
-          <ul class="mark">
-            <li
-              v-for="(item, key) in mark" 
-              :key="key"
-              :style="{backgroundColor: item.color}">
-            </li>
-          </ul>
-        </nav>
-        <div
-          class="shopList limit" 
-          :style="{height: shopListHeight}">
-          <shop-list :geohash="geohash"></shop-list>
-        </div>
-      </div>
+      </ul>
+      <ul class="mark">
+        <li
+          v-for="(item, key) in mark" 
+          :key="key"
+          :style="{backgroundColor: item.color}">
+        </li>
+      </ul>
+    </nav>
+    <div
+      v-touchMove
+      class="shopList">
+      <shop-list :geohash="geohash"></shop-list>
     </div>
     <footer
       class="footer"
@@ -115,12 +106,10 @@ export default {
       position2: '100%',
       trans: '',
       clientHeight: '',
-      footerHeight: '.5rem',
-      searchHeight: '.7rem',
-      overflowYWrap1: 'auto',
-      overflowYWrap2: 'auto',
-      heightWrap2: '',
-      shopListHeight: ''
+      headerHeight: '',
+      headerMarginTop: '',
+      searchHeight: '',
+      footerHeight: ''
     }
   },
 
@@ -288,22 +277,6 @@ export default {
       this.clientHeightSave(this.clientHeight)
     },
 
-    wrap1Up () { // wrap1上划
-      this.heightWrap2 = this.heightCompute
-    },
-
-    wrap1Down () { // wrap1下划
-      this.heightWrap2 = 'auto'
-    },
-
-    wrap2Up () {
-      this.shopListHeight = this.heightCompute // 有点问题
-    },
-
-    wrap2Down () {
-
-    },
-
     ...mapMutations([
       'geoGet',
       'clientHeightSave'
@@ -401,17 +374,13 @@ export default {
       margin: 0 .05rem;
     }
   }
-  .wrap1 {
-    overflow-y: auto;
-  }
-  .wrap2 {
-    overflow-y: auto;
-  }
   .shopList {
-    overflow-y: auto;
+    height: 4rem;
+    overflow: auto;
   }
   .footer {
     width: 100%;
+    height: .5rem;
     background-color: #000;
   }
 </style>
