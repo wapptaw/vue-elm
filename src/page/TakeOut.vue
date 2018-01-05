@@ -1,71 +1,81 @@
 <template>
   <div>
-    <header
-      class="header"
-      :style="{height: headerHeight, marginTop: headerMarginTop}">
-      <div class="geolocation">
-        <span v-if="loading">定位中...</span>
-        <span v-else-if="locationFailure">{{ failure }}</span>
-        <span v-else>{{ address }}</span>
-      </div>
-      <div class="weather">
-        <span>{{ weather.cond_txt }}</span>
-        <span>{{ weather.temp }}</span>
-      </div>
-    </header>
     <div
-      class="search"
-      :style="{height: searchHeight}">
-      <router-link to="">
-        <input type="button" value="开始寻找美食">
-      </router-link>
-    </div>
-    <nav class="nav">
-      <v-touch
-        @swipeleft="menuSlideLeft"
-        @swiperight="menuSlideRight"
-        :swipe-options="{direction: 'horizontal', threshold: 100}"
-        :enabled="true">
-        <ul  
-          :style="{left: position1, transition: trans}"
-          @transitionend = "transEnd1"
-          class="foodNav">
-          <router-link
-            to=""
-            tag="li"
-            v-for="item in msite1"
-            :key="item.id">
-            <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-            <p>{{ item.title }}</p>
-          </router-link>
-        </ul>
-      </v-touch>
-      <ul
-        v-if="visible"
-        :style="{left: position2, transition: trans}"
-        @transitionend = "transEnd2"
-        class="foodNav">
-        <router-link
-          to=""
-          tag="li"
-          v-for="item in msite2"
-          :key="item.id">
-          <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-          <p>{{ item.title }}</p>
+      v-touchMove="{upScroll}"
+      class="wrap1"
+      :style="{height: heightWrap1, overflowY: overflowYWrap1}">
+      <header
+        class="header"
+        :style="{height: headerHeight}">
+        <div class="geolocation">
+          <span v-if="loading">定位中...</span>
+          <span v-else-if="locationFailure">{{ failure }}</span>
+          <span v-else>{{ address }}</span>
+        </div>
+        <div class="weather">
+          <span>{{ weather.cond_txt }}</span>
+          <span>{{ weather.temp }}</span>
+        </div>
+      </header>
+      <div
+        class="search"
+        :style="{height: searchHeight}">
+        <router-link to="">
+          <input type="button" value="开始寻找美食">
         </router-link>
-      </ul>
-      <ul class="mark">
-        <li
-          v-for="(item, key) in mark" 
-          :key="key"
-          :style="{backgroundColor: item.color}">
-        </li>
-      </ul>
-    </nav>
-    <div
-      v-touchMove
-      class="shopList">
-      <shop-list :geohash="geohash"></shop-list>
+      </div>
+      <div
+        v-touchMove
+        class="wrap2"
+        :style="{height: heightWrap2, overflowY: overflowYWrap2}">
+        <nav class="nav">
+          <v-touch
+            @swipeleft="menuSlideLeft"
+            @swiperight="menuSlideRight"
+            :swipe-options="{direction: 'horizontal', threshold: 100}"
+            :enabled="true">
+            <ul  
+              :style="{left: position1, transition: trans}"
+              @transitionend = "transEnd1"
+              class="foodNav">
+              <router-link
+                to=""
+                tag="li"
+                v-for="item in msite1"
+                :key="item.id">
+                <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+                <p>{{ item.title }}</p>
+              </router-link>
+            </ul>
+          </v-touch>
+          <ul
+            v-if="visible"
+            :style="{left: position2, transition: trans}"
+            @transitionend = "transEnd2"
+            class="foodNav">
+            <router-link
+              to=""
+              tag="li"
+              v-for="item in msite2"
+              :key="item.id">
+              <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+              <p>{{ item.title }}</p>
+            </router-link>
+          </ul>
+          <ul class="mark">
+            <li
+              v-for="(item, key) in mark" 
+              :key="key"
+              :style="{backgroundColor: item.color}">
+            </li>
+          </ul>
+        </nav>
+        <div
+          v-touchMove
+          class="shopList">
+          <shop-list :geohash="geohash"></shop-list>
+        </div>
+      </div>
     </div>
     <footer
       class="footer"
@@ -78,7 +88,7 @@ import { mapState, mapMutations } from 'vuex'
 import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
 import { imgBaseUrl } from '../config/url'
 import ShopList from '../components/common/ShopList'
-import { switchRem } from '../config/rem'
+import { switchRem, switchPx } from '../config/rem'
 
 export default {
   name: 'TakeOut',
@@ -106,10 +116,11 @@ export default {
       position2: '100%',
       trans: '',
       clientHeight: '',
-      headerHeight: '',
-      headerMarginTop: '',
-      searchHeight: '',
-      footerHeight: ''
+      headerHeight: '.4rem',
+      searchHeight: '.7rem',
+      footerHeight: '.55rem',
+      overflowYWrap1: 'auto',
+      overflowYWrap2: 'hidden'
     }
   },
 
@@ -143,7 +154,7 @@ export default {
       return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
     },
 
-    heightCompute () {
+    heightWrap2 () {
       return `${switchRem(this.clientHeight) - switchRem(this.footerHeight) - switchRem(this.searchHeight)}rem`
     },
 
@@ -277,6 +288,14 @@ export default {
       this.clientHeightSave(this.clientHeight)
     },
 
+    upScroll (e) {
+      if (e.scrollTop >= switchPx(this.headerHeight)) {
+        this.overflowYWrap1 = 'hidden'
+        this.overflowYWrap2 = 'auto'
+        console.log(666)
+      }
+    },
+
     ...mapMutations([
       'geoGet',
       'clientHeightSave'
@@ -288,7 +307,7 @@ export default {
 <style lang="scss" scoped>
   .header {
     width: 100%;
-    height: .4rem;
+    // height: .4rem;
     padding: 0 2%;
     box-sizing: border-box;
     background-color: #0f96e4;
@@ -322,6 +341,7 @@ export default {
     padding-top: .1rem;
     background-color: #0f96e4;
     box-sizing: border-box;
+    // height: .7rem;
     input {
       display: block;
       color: rgb(80, 80, 80);
@@ -374,13 +394,9 @@ export default {
       margin: 0 .05rem;
     }
   }
-  .shopList {
-    height: 4rem;
-    overflow: auto;
-  }
   .footer {
     width: 100%;
-    height: .5rem;
+    // height: .5rem;
     background-color: #000;
   }
 </style>
