@@ -1,9 +1,8 @@
 <template>
   <div>
     <div
-      v-touchMove="{upScroll}"
       class="wrap1"
-      :style="{height: heightWrap1, overflowY: overflowYWrap1}">
+      :style="{height: heightWrap1}">
       <header
         class="header"
         :style="{height: headerHeight}">
@@ -25,9 +24,8 @@
         </router-link>
       </div>
       <div
-        v-touchMove
         class="wrap2"
-        :style="{height: heightWrap2, overflowY: overflowYWrap2}">
+        :style="{height: heightWrap2}">
         <nav class="nav">
           <v-touch
             @swipeleft="menuSlideLeft"
@@ -71,7 +69,6 @@
           </ul>
         </nav>
         <div
-          v-touchMove
           class="shopList">
           <shop-list :geohash="geohash"></shop-list>
         </div>
@@ -119,8 +116,8 @@ export default {
       headerHeight: '.4rem',
       searchHeight: '.7rem',
       footerHeight: '.55rem',
-      overflowYWrap1: 'auto',
-      overflowYWrap2: 'hidden'
+      heightWrap1Onoff: true,
+      heightWrap2Onoff: false
     }
   },
 
@@ -151,11 +148,19 @@ export default {
     },
 
     heightWrap1 () {
-      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
+      if (this.heightWrap1Onoff) {
+        return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
+      } else {
+        return 'auto'
+      }
     },
 
     heightWrap2 () {
-      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight) - switchRem(this.searchHeight)}rem`
+      if(this.heightWrap2Onoff) {
+        return `${switchRem(this.clientHeight) - switchRem(this.footerHeight) - switchRem(this.searchHeight)}rem`
+      } else {
+        return 'auto'
+      }
     },
 
     ...mapState([
@@ -288,12 +293,16 @@ export default {
       this.clientHeightSave(this.clientHeight)
     },
 
-    upScroll (e) {
+    upScroll1 (e) {
       if (e.scrollTop >= switchPx(this.headerHeight)) {
-        this.overflowYWrap1 = 'hidden'
-        this.overflowYWrap2 = 'auto'
-        console.log(666)
+        this.heightWrap1Onoff = false
+        this.heightWrap2Onoff = true
       }
+    },
+
+    upScroll2 (e) {
+      
+      
     },
 
     ...mapMutations([

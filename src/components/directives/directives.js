@@ -1,8 +1,8 @@
 import Vue from 'vue'
 
 Vue.directive('touchMove', {
-  inserted (el, binding) {
-    if (el.scrollTop === 'undefined') return // 取不到scrollTop值，直接返回
+  inserted (el, binding, vnode) {
+    if (el.style.height === 'auto') return
     let start, date, dateStart
     let scrollPrevious = 0 // 保存滚动条上次所在位置
     let moveSave = []
@@ -36,11 +36,11 @@ Vue.directive('touchMove', {
       el.scrollTop = -distance + scrollPrevious
       if (moveSave[1] < moveSave[0]) {
         if (binding.value && binding.value.upScroll) {
-          binding.value.upScroll(el) // 向上滑动时运行的函数
+          binding.value.upScroll(el, vnode) // 向上滑动时运行的函数
         }
       } else {
         if (binding.value && binding.value.downScroll) {
-          binding.value.downScroll(el) // 向下滑动时运行的函数
+          binding.value.downScroll(el, vnode) // 向下滑动时运行的函数
         }
       }
     })
