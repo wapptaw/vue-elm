@@ -5,8 +5,8 @@ import App from './App'
 import router from './router'
 import store from './store/'
 import VueTouch from 'vue-touch'
-import directive from './components/directives/directives'
-// import {test} from './service/getData'
+// import directive from './components/directives/directives'
+// import {cityGroup} from './service/getData'
 
 Vue.use(VueTouch, {name: 'v-touch'})
 
@@ -21,6 +21,6 @@ new Vue({
   components: { App }
 })
 
-// test().then(res => {
+// cityGroup().then(res => {
 //   console.log(res)
 // })

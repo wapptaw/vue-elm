@@ -3,13 +3,13 @@ import Vue from 'vue'
 Vue.directive('touchMove', {
   inserted (el, binding, vnode) {
     if (el.style.height === 'auto') return
-    let start, date, dateStart
+    let start, dateStart
     let scrollPrevious = 0 // 保存滚动条上次所在位置
     let moveSave = []
     let dateSave = []
     let timmer = null
     let scrollNow = 0 // 滚动当前所在位置
-    
+
     el.addEventListener('touchstart', function (e) {
       clearInterval(timmer)
       moveSave = []
@@ -24,7 +24,7 @@ Vue.directive('touchMove', {
       let move = e.targetTouches[0].clientY // 手指滑动时所在屏幕Y轴位置
       let distance = move - start // 每次滑动的距离
       let date = new Date()
-      if (moveSave.length < 2) { 
+      if (moveSave.length < 2) {
         moveSave.push(move) // 保存最近两次滑动所在的位置跟时间
         dateSave.push(date)
       } else {
@@ -60,8 +60,8 @@ Vue.directive('touchMove', {
       if (speed < -5) {
         speed = -5
       }
-      if (Math.abs(speed) > .5) { // speed超过某一直后就会持续移动
-        timmer = setInterval(function() {
+      if (Math.abs(speed) > 0.5) { // speed超过某一直后就会持续移动
+        timmer = setInterval(function () {
           if (speed < 0) {
             speed = speed + reduction
             if (binding.value && binding.value.upScroll) {
@@ -79,7 +79,7 @@ Vue.directive('touchMove', {
             if (speed < 0) {
               speed = 0
             }
-            scrollNow -= speed * 16 
+            scrollNow -= speed * 16
           }
           el.scrollTop = scrollNow
           if (speed === 0 || el.scrollTop === 0 || el.scrollTop === elementHeight) {

@@ -6,9 +6,11 @@
 
 <script>
   import BScroll from 'better-scroll'
-　
+
   export default {
-　　props: {
+    name: 'scroll',
+
+    props: {
       probeType: {
         type: Number,
         default: 1
@@ -20,6 +22,10 @@
       scrollX: {
         type: Boolean,
         default: false
+      },
+      scrollY: {
+        type: Boolean,
+        default: true
       },
       listenScroll: {
         type: Boolean,
@@ -44,17 +50,37 @@
       refreshDelay: {
         type: Number,
         default: 20
+      },
+      useTransition: {
+        type: Boolean,
+        default: false
+      },
+      pullUpLoad: {
+        type: [Boolean, Object],
+        default: false
+      },
+      pullingUp: {
+        type: Boolean,
+        default: false
       }
     },
 
     data () {
       return {
-        
+        scroll: ''
       }
     },
 
-    mounted() {
-      this.nextTick(() => {
+    computed: {
+      posY () {
+        if (this.scroll) {
+          return this.scroll.y
+        }
+      }
+    },
+
+    mounted () {
+      this.$nextTick(() => {
         this._initScroll()
       })
     },
@@ -66,17 +92,19 @@
         this.scroll = new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
           click: this.click,
-          scrollX: this.scrollX
+          scrollX: this.scrollX,
+          scrollY: this.scrollY,
+          useTransition: this.useTransition,
+          pullUpLoad: this.pullUpLoad
         })
 
         if (this.listenScroll) {
-          let me = this
           this.scroll.on('scroll', pos => {
-            me.$emit('scroll', pos)  
+            this.$emit('scroll', pos, this)
           })
         }
 
-        if (this.pullup) {
+        if (this.pullup) { // 上拉
           this.scroll.on('scrollEnd', () => {
             if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
               this.$emit('scrollToEnd')
@@ -84,8 +112,14 @@
           })
         }
 
-        if (this.pulldown) {
-          this.scroll.on('touchend', pos => {
+        if (this.pullingUp) { // 上拉（只激活一次）
+          this.scroll.on('pullingUp', () => {
+            this.$emit('pullingUp')
+          })
+        }
+
+        if (this.pulldown) { // 下拉
+          this.scroll.on('touchEnd', pos => {
             if (pos.y > 50) {
               this.$emit('pulldown')
             }
@@ -97,7 +131,7 @@
             this.$emit('beforeScroll')
           })
         }
-    　},
+      },
 
       disable () {
         this.scroll && this.scroll.disable()
@@ -125,6 +159,10 @@
         setTimeout(() => {
           this.refresh()
         }, this.refreshDelay)
+      },
+
+      posY (newPosY) {
+        this.$emit('posChange', newPosY) // 监听y轴变化
       }
     }
   }

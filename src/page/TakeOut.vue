@@ -1,79 +1,89 @@
 <template>
   <div>
-    <div
+    <scroll
+      @posChange="keepSearchBox"
+      :listenScroll="listenScroll"
+      :pullup="true"
+      :pulldown="true"
+      @scrollToEnd="pullup"
+      @pulldown="pulldown"
       class="wrap1"
       :style="{height: heightWrap1}">
-      <header
-        class="header"
-        :style="{height: headerHeight}">
-        <div class="geolocation">
-          <span v-if="loading">定位中...</span>
-          <span v-else-if="locationFailure">{{ failure }}</span>
-          <span v-else>{{ address }}</span>
+      <div ref="transElm">
+        <header class="header">
+          <router-link to="AddressSearch" tag="div">
+            <div class="geolocation">
+              <span v-if="loading">定位中...</span>
+              <span v-else-if="locationFailure">{{ failure }}</span>
+              <span v-else>{{ address }}</span>
+            </div>
+          </router-link>
+          <div class="weather">
+            <span>{{ weather.cond_txt }}</span>
+            <span>{{ weather.temp }}</span>
+          </div>
+        </header>
+        <div
+          ref="search"
+          class="search">
+          <router-link to="">
+            <input type="button" value="开始寻找美食">
+          </router-link>
         </div>
-        <div class="weather">
-          <span>{{ weather.cond_txt }}</span>
-          <span>{{ weather.temp }}</span>
-        </div>
-      </header>
-      <div
-        class="search"
-        :style="{height: searchHeight}">
-        <router-link to="">
-          <input type="button" value="开始寻找美食">
-        </router-link>
-      </div>
-      <div
-        class="wrap2"
-        :style="{height: heightWrap2}">
-        <nav class="nav">
-          <v-touch
-            @swipeleft="menuSlideLeft"
-            @swiperight="menuSlideRight"
-            :swipe-options="{direction: 'horizontal', threshold: 100}"
-            :enabled="true">
-            <ul  
-              :style="{left: position1, transition: trans}"
-              @transitionend = "transEnd1"
+        <div>
+          <nav class="nav">
+            <v-touch
+              @swipeleft="menuSlideLeft"
+              @swiperight="menuSlideRight"
+              :swipe-options="{direction: 'horizontal', threshold: 100}"
+              :enabled="true">
+              <ul  
+                :style="{left: position1, transition: trans}"
+                @transitionend = "transEnd1"
+                class="foodNav">
+                <router-link
+                  to=""
+                  tag="li"
+                  v-for="item in msite1"
+                  :key="item.id">
+                  <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+                  <p>{{ item.title }}</p>
+                </router-link>
+              </ul>
+            </v-touch>
+            <ul
+              v-if="visible"
+              :style="{left: position2, transition: trans}"
+              @transitionend = "transEnd2"
               class="foodNav">
               <router-link
                 to=""
                 tag="li"
-                v-for="item in msite1"
+                v-for="item in msite2"
                 :key="item.id">
                 <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
                 <p>{{ item.title }}</p>
               </router-link>
             </ul>
-          </v-touch>
-          <ul
-            v-if="visible"
-            :style="{left: position2, transition: trans}"
-            @transitionend = "transEnd2"
-            class="foodNav">
-            <router-link
-              to=""
-              tag="li"
-              v-for="item in msite2"
-              :key="item.id">
-              <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-              <p>{{ item.title }}</p>
-            </router-link>
-          </ul>
-          <ul class="mark">
-            <li
-              v-for="(item, key) in mark" 
-              :key="key"
-              :style="{backgroundColor: item.color}">
-            </li>
-          </ul>
-        </nav>
-        <div
-          class="shopList">
-          <shop-list :geohash="geohash"></shop-list>
+            <ul class="mark">
+              <li
+                v-for="(item, key) in mark" 
+                :key="key"
+                :style="{backgroundColor: item.color}">
+              </li>
+            </ul>
+          </nav>
+          <div
+            class="shopList">
+            <shop-list
+              :geohash="geohash"
+              :offset="data.offset"
+              :refreshContral="refreshContral"
+              @listenOffset="listenOffset"></shop-list>
+          </div>
         </div>
       </div>
-    </div>
+    </scroll>
     <footer
       class="footer"
       :style="{height: footerHeight}"></footer>
@@ -81,17 +91,19 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
 import { imgBaseUrl } from '../config/url'
 import ShopList from '../components/common/ShopList'
-import { switchRem, switchPx } from '../config/rem'
+import { switchRem } from '../config/rem'
+import scroll from '../components/common/scroll'
 
 export default {
   name: 'TakeOut',
 
   components: {
-    ShopList
+    ShopList,
+    scroll
   },
 
   data () {
@@ -113,17 +125,23 @@ export default {
       position2: '100%',
       trans: '',
       clientHeight: '',
-      headerHeight: '.4rem',
-      searchHeight: '.7rem',
       footerHeight: '.55rem',
-      heightWrap1Onoff: true,
-      heightWrap2Onoff: false
+      listenScroll: true,
+      refreshContral: true,
+      offsetLimit: true,
+      data: {
+        offset: 0
+      }
     }
   },
 
   computed: {
-    geohash () {
-      return `${this.latitude},${this.longitude}`
+    geohashGet () {
+      if (this.geohash) {
+        return this.geohash
+      } else {
+        return `${this.latitude},${this.longitude}`
+      }
     },
 
     msite1 () {
@@ -148,39 +166,29 @@ export default {
     },
 
     heightWrap1 () {
-      if (this.heightWrap1Onoff) {
-        return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
-      } else {
-        return 'auto'
-      }
-    },
-
-    heightWrap2 () {
-      if(this.heightWrap2Onoff) {
-        return `${switchRem(this.clientHeight) - switchRem(this.footerHeight) - switchRem(this.searchHeight)}rem`
-      } else {
-        return 'auto'
-      }
+      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
     },
 
     ...mapState([
       'latitude',
-      'longitude'
+      'longitude',
+      'geohash'
     ])
   },
 
   watch: {
-    geohash (val) {
+    geohashGet (val) {
       this.addressGet(val)
       this.weatherGet(val)
+      this.geohashSave(val)
     }
   },
 
   mounted () {
     this.getGeo()
-    this.addressGet(this.geohash)
-    this.weatherGet(this.geohash)
-    this.msiteFoodTypesGet(this.geohash)
+    this.addressGet(this.geohashGet)
+    this.weatherGet(this.geohashGet)
+    this.msiteFoodTypesGet(this.geohashGet)
     this.clientHeightGet()
   },
 
@@ -198,7 +206,7 @@ export default {
       const longitude = position.coords.longitude
       this.loading = false
       this.locationFailure = false
-      this.geoGet({
+      this.geoSave({
         latitude,
         longitude
       })
@@ -232,6 +240,8 @@ export default {
     addressGet (geohash) { // 具体地址获取
       getAddress(geohash).then(response => {
         this.address = response.result.formatted_address
+        this.cityNameSave(response.result.addressComponent.city + response.result.addressComponent.district)
+        this.cityIdGet() // 保存cityId
       }).catch(e => {
         throw new Error(e)
       })
@@ -290,24 +300,41 @@ export default {
 
     clientHeightGet () { // 获取屏幕高度
       this.clientHeight = `${document.documentElement.clientHeight}px`
-      this.clientHeightSave(this.clientHeight)
+      this.clientHeightSave(document.documentElement.clientHeight)
     },
 
-    upScroll1 (e) {
-      if (e.scrollTop >= switchPx(this.headerHeight)) {
-        this.heightWrap1Onoff = false
-        this.heightWrap2Onoff = true
+    keepSearchBox (posY) {
+      if (posY <= -40) {
+        this.$refs.search.style.transform = `translateY(${-(posY + 40)}px)`
+      } else {
+        this.$refs.search.style.transform = 'translateY(0)'
       }
     },
 
-    upScroll2 (e) {
-      
-      
+    pullup () {
+      if (this.offsetLimit) {
+        this.data.offset += 20
+      }
+    },
+
+    pulldown () {
+      this.data.offset = 0
+      this.refreshContral = !this.refreshContral
+    },
+
+    listenOffset (offsetLimit) {
+      this.offsetLimit = offsetLimit
     },
 
     ...mapMutations([
-      'geoGet',
+      'geoSave',
+      'geohashSave',
+      'cityNameSave',
       'clientHeightSave'
+    ]),
+
+    ...mapActions([
+      'cityIdGet'
     ])
   }
 }
@@ -316,7 +343,7 @@ export default {
 <style lang="scss" scoped>
   .header {
     width: 100%;
-    // height: .4rem;
+    height: .4rem;
     padding: 0 2%;
     box-sizing: border-box;
     background-color: #0f96e4;
@@ -350,7 +377,9 @@ export default {
     padding-top: .1rem;
     background-color: #0f96e4;
     box-sizing: border-box;
-    // height: .7rem;
+    height: .7rem;
+    position: relative;
+    z-index: 1;
     input {
       display: block;
       color: rgb(80, 80, 80);
@@ -403,9 +432,11 @@ export default {
       margin: 0 .05rem;
     }
   }
+  .wrap1 {
+    overflow-y: hidden;
+  }
   .footer {
     width: 100%;
-    // height: .5rem;
     background-color: #000;
   }
 </style>

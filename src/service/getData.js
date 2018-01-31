@@ -13,10 +13,6 @@ export const getWeather = (geo) => fetch('https://free-api.heweather.com/s6/weat
   location: geo
 })  // 获取天气情况
 
-export const cityGuess = () => fetch(`${baseUrl}/v1/cities`, {
-  type: 'guess'
-}) // 默认城市
-
 export const cityHot = () => fetch(`${baseUrl}/v1/cities`, {
   type: 'hot'
 }) // 热门城市
@@ -29,11 +25,11 @@ export const msiteFoodTypes = geo => fetch(`${baseUrl}/v2/index_entry`, {
   geohash: geo,
   group_type: '1',
   'flags[]': 'F'
-})
+}) // msite列表
 
-export const shopList = (latitude, longitude, offset, restaurant_category_id = '', restaurant_category_ids = '', order_by = '', delivery_mode = '', support_ids = []) => {
+export const shopList = (latitude, longitude, offset, restaurantCategoryId = '', restaurantCategoryIds = '', orderBy = '', deliveryMode = '', supportIds = []) => {
   let supportStr = ''
-  support_ids.forEach(item => {
+  supportIds.forEach(item => {
     if (item.status) {
       supportStr += `&support_ids[]=${item.id}`
     }
@@ -45,9 +41,20 @@ export const shopList = (latitude, longitude, offset, restaurant_category_id = '
     limit: '20',
     'extras[]': 'activities',
     keyword: '',
-    restaurant_category_id,
-    'restaurant_category_ids[]': restaurant_category_ids,
-    order_by,
-    'delivery_mode[]': delivery_mode + supportStr
+    restaurant_category_id: restaurantCategoryId,
+    'restaurant_category_ids[]': restaurantCategoryIds,
+    order_by: orderBy,
+    'delivery_mode[]': deliveryMode + supportStr
   })
-}
+} // takeout页面店铺列表
+
+export const searchNearby = keyword => fetch(`${baseUrl}/v1/pois`, {
+  type: 'nearby',
+  keyword
+}) // 搜索附近
+
+export const searchPlace = (cityId, value) => fetch(`${baseUrl}/v1/pois`, {
+  type: 'search',
+  city_id: cityId,
+  keyword: value
+}) // 搜索地址

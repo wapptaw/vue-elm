@@ -26,9 +26,9 @@
               <span class="recent">月售{{item.recent_order_num}}单</span>
             </span>
             <span
-              :style="{backgroundColor: `#${item.delivery_mode.color}`}"
+              :style="{backgroundColor: `#${item.delivery_mode && item.delivery_mode.color}`}"
               class="deliveryMode">
-                {{item.delivery_mode.text}}
+                {{item.delivery_mode && item.delivery_mode.text}}
             </span>
           </div>
           <div class="delivery">
@@ -64,6 +64,9 @@
         </div>
       </li>
     </ul>
+    <div
+      v-if="!offsetLimit"
+      class="ending">已经到底了</div>
   </div>
 </template>
 
@@ -96,14 +99,22 @@ export default {
     },
     geohash: {
       default: ''
+    },
+    offset: {
+      type: Number,
+      default: 0
+    },
+    refreshContral: { // 刷新控制
+      type: Boolean,
+      default: false
     }
   },
 
   data () {
     return {
-      offset: 0,
-      listDate: '',
-      imgBaseUrl2
+      listDate: [],
+      imgBaseUrl2,
+      offsetLimit: true // offset极限控制
     }
   },
 
@@ -114,6 +125,22 @@ export default {
     ])
   },
 
+  watch: {
+    offset () {
+      if (this.offsetLimit) {
+        this.listDateGet()
+      } else {
+        this.$emit('listenOffset', this.offsetLimit)
+      }
+    },
+
+    refreshContral () {
+      this.listDate = []
+      this.listDateGet()
+      this.offsetLimit = true
+    }
+  },
+
   mounted () {
     this.listDateGet()
   },
@@ -122,10 +149,14 @@ export default {
     async listDateGet () {
       try {
         let res = await shopList(this.latitude, this.longitude, this.offset)
-        this.listDate = res.map(item => {
+        let listArr = res.map(item => {
           item.show = false
           return item
         })
+        if (listArr < 20) {
+          this.offsetLimit = false
+        }
+        this.listDate = this.listDate.concat(listArr)
       } catch (err) {
         throw new Error(err)
       }
@@ -256,5 +287,12 @@ export default {
         }
       }
     }
+  }
+  .ending {
+    text-align: center;
+    background-color: #fd6161;
+    line-height: .25rem;
+    height: .25rem;
+    color: #fff;
   }
 </style>
