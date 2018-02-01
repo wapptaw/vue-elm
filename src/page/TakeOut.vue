@@ -26,7 +26,7 @@
         <div
           ref="search"
           class="search">
-          <router-link to="">
+          <router-link to="ShopSearch">
             <input type="button" value="开始寻找美食">
           </router-link>
         </div>

@@ -58,3 +58,10 @@ export const searchPlace = (cityId, value) => fetch(`${baseUrl}/v1/pois`, {
   city_id: cityId,
   keyword: value
 }) // 搜索地址
+
+export const searchRestaurant = (geohash, keyword) => fetch(`${baseUrl}/v4/restaurants`, {
+  'extras[]': 'restaurant_activity',
+  geohash,
+  keyword,
+  type: 'search'
+})
