@@ -42,7 +42,7 @@
                 @transitionend = "transEnd1"
                 class="foodNav">
                 <router-link
-                  to=""
+                  :to="{path: `/FoodCategory/${item.title}`, query: {restaurantCategoryId: item.id, restaurantCategoryTitle: item.title}}" 
                   tag="li"
                   v-for="item in msite1"
                   :key="item.id">
@@ -76,7 +76,6 @@
           <div
             class="shopList">
             <shop-list
-              :geohash="geohash"
               :offset="data.offset"
               :refreshContral="refreshContral"
               @listenOffset="listenOffset"></shop-list>
@@ -94,7 +93,7 @@
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
 import { imgBaseUrl } from '../config/url'
-import ShopList from '../components/common/ShopList'
+// import ShopList from '../components/common/ShopList'
 import { switchRem } from '../config/rem'
 import scroll from '../components/common/scroll'
 
@@ -102,7 +101,7 @@ export default {
   name: 'TakeOut',
 
   components: {
-    ShopList,
+    ShopList: async () => import('../components/common/ShopList'), // 异步加载组件
     scroll
   },
 
@@ -139,8 +138,10 @@ export default {
     geohashGet () {
       if (this.geohash) {
         return this.geohash
-      } else {
+      } else if (this.latitude && this.longitude) {
         return `${this.latitude},${this.longitude}`
+      } else {
+        return ''
       }
     },
 
@@ -181,6 +182,7 @@ export default {
       this.addressGet(val)
       this.weatherGet(val)
       this.geohashSave(val)
+      this.msiteFoodTypesGet(val)
     }
   },
 
@@ -206,10 +208,12 @@ export default {
       const longitude = position.coords.longitude
       this.loading = false
       this.locationFailure = false
-      this.geoSave({
-        latitude,
-        longitude
-      })
+      if (this.latitude === '' || this.longitude === '') {
+        this.geoSave({
+          latitude,
+          longitude
+        })
+      }
     },
 
     showError (error) { // 定位失败处理
@@ -238,28 +242,34 @@ export default {
     },
 
     addressGet (geohash) { // 具体地址获取
-      getAddress(geohash).then(response => {
-        this.address = response.result.formatted_address
-        this.cityNameSave(response.result.addressComponent.city + response.result.addressComponent.district)
-        this.cityIdGet() // 保存cityId
-      }).catch(e => {
-        throw new Error(e)
-      })
+      if (geohash) {
+        getAddress(geohash).then(response => {
+          this.address = response.result.formatted_address
+          this.cityNameSave(response.result.addressComponent.city + response.result.addressComponent.district)
+          this.cityIdGet() // 保存cityId
+        }).catch(e => {
+          throw new Error(e)
+        })
+      }
     },
 
     weatherGet (geohash) { // 天气获取
-      getWeather(geohash).then(response => {
-        this.weather.cond_txt = response.HeWeather6[0].now.cond_txt
-        this.weather.temp = response.HeWeather6[0].now.tmp
-      }).catch(e => {
-        throw new Error(e)
-      })
+      if (geohash) {
+        getWeather(geohash).then(response => {
+          this.weather.cond_txt = response.HeWeather6[0].now.cond_txt
+          this.weather.temp = response.HeWeather6[0].now.tmp
+        }).catch(e => {
+          throw new Error(e)
+        })
+      }
     },
 
     msiteFoodTypesGet (geohash) {  // 食物分类列表
-      msiteFoodTypes(geohash).then(response => {
-        this.msite = response
-      })
+      if (geohash) {
+        msiteFoodTypes(geohash).then(response => {
+          this.msite = response
+        })
+      }
     },
 
     menuSlideLeft () { // 左滑事件

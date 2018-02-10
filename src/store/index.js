@@ -7,8 +7,8 @@ import actions from './actions'
 Vue.use(Vuex)
 
 const state = {
-  latitude: '39.915', // 当前纬度
-  longitude: '116.404', // 当前经度
+  latitude: '', // 当前纬度
+  longitude: '', // 当前经度
   geohash: '',
   cityName: '', // 城市名
   cityId: '', // 城市id

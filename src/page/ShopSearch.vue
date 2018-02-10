@@ -1,16 +1,11 @@
 <template>
   <div>
-    <div>
+    <div ref="topContent">
       <TopBack title="美食选择"></TopBack>
-      <SearchBox placeholder="美食、商铺" :inputEventAble="true" @changeVal="searchFood"></SearchBox>
+      <SearchBox placeholder="美食、商铺" :inputEventAble="true" @getSearchData="searchFood"></SearchBox>
     </div>
-    <div>
-      <div>
-        <ul>
-          <li v-for="item in foodSearchList" :key="item.id">{{item.name}}</li>
-        </ul>
-      </div>
-      <!-- <ShopList :foodListData="foodSearchList"></ShopList> -->
+    <div :style="{height: cityContentHeight, overflowY: 'auto'}">
+      <ShopList :foodListData="foodSearchList" :getDataOutside="true"></ShopList>
     </div>
   </div>
 </template>
@@ -38,17 +33,33 @@ export default {
   },
 
   computed: {
+    cityContentHeight () {
+      return `${this.clientHeight - this.topContentHeight}px`
+    },
+
     ...mapState([
-      'geohash'
+      'geohash',
+      'clientHeight'
     ])
+  },
+
+  mounted () {
+    this.$nextTick(() => {
+      let topContent = this.$refs.topContent
+      this.topContentHeight = topContent.offsetHeight
+    })
   },
 
   methods: {
     async searchFood (val) {
       try {
-        let res = await searchRestaurant(this.geohash, val)
+        let res
+        if (val) {
+          res = await searchRestaurant(this.geohash, val)
+        } else {
+          res = []
+        }
         this.foodSearchList = res
-        console.log(res)
       } catch (e) {
         throw new Error(e)
       }

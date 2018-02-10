@@ -64,4 +64,29 @@ export const searchRestaurant = (geohash, keyword) => fetch(`${baseUrl}/v4/resta
   geohash,
   keyword,
   type: 'search'
+}) // 店铺搜索
+
+export const foodCategory = (latitude, longitude) => fetch(`${baseUrl}/shopping/v2/restaurant/category`, {
+  latitude,
+  longitude
 })
+
+export const shopDetails = (shopId, latitude, longitude) => fetch(`${baseUrl}/shopping/restaurant/${shopId}?extras[]=activities&extras[]=album&extras[]=license&extras[]=identification&extras[]=statistics`, {
+  latitude,
+  longitude: `${longitude}`
+}) // 商铺详情
+
+export const foodMean = restaurantId => fetch(`${baseUrl}/shopping/v2/menu`, {
+  restaurant_id: restaurantId
+}) // shop页面菜单列表
+
+export const getRatingList = (shopId, offset, tagName = '') => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings`, {
+  has_content: true,
+  offset,
+  limit: 10,
+  tag_name: tagName
+}) // 商铺评价列表
+
+export const ratingScores = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/scores`) // 评价分数
+
+export const ratingTags = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/tags`) // 评价分类

@@ -125,7 +125,7 @@ export default {
     async groupCityGet () {
       try {
         let res
-        // let cityGroupData = sessionStorage.getItem('cityGroup')
+        // let cityGroupData = sessionStorage.getItem('cityGroup') // 使用sessionStorage保存
         // if (cityGroupData) {
         //   res = JSON.parse(cityGroupData)
         // } else {
@@ -190,11 +190,13 @@ export default {
     changeCity (item) {
       let geohash = item.latitude + ',' + item.longitude
       this.geohashSave(geohash)
+      this.geoSave({latitude: item.latitude, longitude: item.longitude})
     },
 
     ...mapMutations([
       'geohashSave',
-      'cityGroupDataSave'
+      'cityGroupDataSave',
+      'geoSave'
     ])
   }
 }

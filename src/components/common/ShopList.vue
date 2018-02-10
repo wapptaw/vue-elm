@@ -1,7 +1,9 @@
 <template>
   <div>
     <ul class="shopList">
-      <li
+      <router-link
+        tag="li"
+        :to="{path: `FoodPage/${item.id}`}"
         v-for="(item, index) in listDate"
         :key="item.id"
         class="list">
@@ -56,17 +58,19 @@
               <span class="description">{{activity.description}}</span>
             </li>
           </ul>
-          <v-touch
+          <div
             class="amount"
-            @tap="activittyOnOff(index)">
+            @click.stop="activittyOnOff(index)">
             {{item.activities.length}}个活动
-          </v-touch>
+          </div>
         </div>
-      </li>
+      </router-link>
     </ul>
     <div
       v-if="!offsetLimit"
-      class="ending">已经到底了</div>
+      class="ending">
+      已经到底了
+    </div>
   </div>
 </template>
 
@@ -80,24 +84,31 @@ export default {
 
   props: {
     restaurantCategoryId: {
+      type: [String, Number],
       default: ''
     },
     restaurantCategoryIds: {
-      default: ''
+      type: Array,
+      default () {
+        return []
+      }
     },
-    sortByType: {
+    orderBy: {
+      type: String,
       default: ''
     },
     deliveryMode: {
+      type: String,
       default: ''
     },
     supportIds: {
-      default: ''
+      type: Array,
+      default () {
+        return []
+      }
     },
     confirmSelect: {
-      default: ''
-    },
-    geohash: {
+      type: String,
       default: ''
     },
     offset: {
@@ -105,6 +116,16 @@ export default {
       default: 0
     },
     refreshContral: { // 刷新控制
+      type: Boolean,
+      default: false
+    },
+    foodListData: { // 外部直接传入列表数据
+      type: Array,
+      default () {
+        return []
+      }
+    },
+    getDataOutside: { // 是否使用外部传入列表数据
       type: Boolean,
       default: false
     }
@@ -121,7 +142,8 @@ export default {
   computed: {
     ...mapState([
       'latitude',
-      'longitude'
+      'longitude',
+      'geohash'
     ])
   },
 
@@ -138,6 +160,14 @@ export default {
       this.listDate = []
       this.listDateGet()
       this.offsetLimit = true
+    },
+
+    foodListData () {
+      this.listDateGet()
+    },
+
+    geohash () {
+      this.listDateGet()
     }
   },
 
@@ -148,15 +178,25 @@ export default {
   methods: {
     async listDateGet () {
       try {
-        let res = await shopList(this.latitude, this.longitude, this.offset)
-        let listArr = res.map(item => {
-          item.show = false
-          return item
-        })
-        if (listArr < 20) {
-          this.offsetLimit = false
+        if (!this.getDataOutside) {
+          if (this.geohash !== '') {
+            let res = await shopList(this.latitude, this.longitude, this.offset, this.restaurantCategoryId, this.restaurantCategoryIds, this.orderBy, this.deliveryMode, this.supportIds)
+            let listArr = res.map(item => {
+              item.show = false
+              return item
+            })
+            if (listArr < 20) {
+              this.offsetLimit = false
+            }
+            this.listDate = this.listDate.concat(listArr)
+          }
+        } else {
+          let listArr = this.foodListData.map(item => {
+            item.show = false
+            return item
+          })
+          this.listDate = listArr
         }
-        this.listDate = this.listDate.concat(listArr)
       } catch (err) {
         throw new Error(err)
       }
@@ -175,7 +215,6 @@ export default {
     }
   }
 }
-// 下拉加载更多、回到顶部 // 自定义指令 // 考虑加载不到数据的情况 // 考虑数据不够20个的情况
 </script>
 
 <style lang="scss" scoped>

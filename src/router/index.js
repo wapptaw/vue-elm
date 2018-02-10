@@ -4,6 +4,11 @@ import TakeOut from '../page/TakeOut'
 import AddressSearch from '../page/AddressSearch'
 import CitySelect from '../page/CitySelect'
 import ShopSearch from '../page/ShopSearch'
+import FoodCategory from '../page/FoodCategory'
+import FoodPage from '../page/FoodPage/FoodPage'
+import order from '../page/FoodPage/children/order'
+import evaluate from '../page/FoodPage/children/evaluate'
+import merchant from '../page/FoodPage/children/merchant'
 Vue.use(Router)
 
 export default new Router({
@@ -27,6 +32,33 @@ export default new Router({
       path: '/ShopSearch',
       name: 'shopSearch',
       component: ShopSearch
+    },
+    {
+      path: '/FoodCategory/:category',
+      name: 'foodCategory',
+      component: FoodCategory
+    },
+    {
+      path: '/FoodPage/:id',
+      name: 'foodPage',
+      component: FoodPage,
+      children: [
+        {
+          path: 'order',
+          name: 'order',
+          component: order
+        },
+        {
+          path: 'evaluate',
+          name: 'evaluate',
+          component: evaluate
+        },
+        {
+          path: 'merchant',
+          name: 'merchant',
+          component: merchant
+        }
+      ]
     }
   ]
 })

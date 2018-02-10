@@ -117,10 +117,12 @@ export default {
     changeGeohash (item) {
       this.geohashSave(item.geohash)
       this.historyListSave(item)
+      this.geoSave({latitude: item.latitude, longitude: item.longitude})
     },
 
     lookHistory (item) {
       this.geohashSave(item.geohash)
+      this.geoSave({latitude: item.latitude, longitude: item.longitude})
     },
 
     removeHistory () {
@@ -130,7 +132,8 @@ export default {
     ...mapMutations([
       'geohashSave',
       'historyListSave',
-      'historyListRemove'
+      'historyListRemove',
+      'geoSave'
     ])
   }
 }
