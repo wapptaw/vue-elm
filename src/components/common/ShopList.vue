@@ -3,7 +3,8 @@
     <ul class="shopList">
       <router-link
         tag="li"
-        :to="{path: `FoodPage/${item.id}`}"
+        :to="{name: 'order', params: {id: item.id}}"
+        
         v-for="(item, index) in listDate"
         :key="item.id"
         class="list">

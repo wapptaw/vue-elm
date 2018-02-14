@@ -14,8 +14,9 @@ const state = {
   cityId: '', // 城市id
   cityGroup: '', // 所有城市
   clientHeight: '', // 屏幕高度
-  historyList: [],
-  cityGroupData: {}
+  historyList: [], // 搜索记录
+  cityGroupData: {}, // 城市列表
+  detailsHeight: '' // foodPage页面header高度
 }
 
 export default new Vuex.Store({

@@ -42,6 +42,7 @@ export default new Router({
       path: '/FoodPage/:id',
       name: 'foodPage',
       component: FoodPage,
+      props: true, // 这个设置为true使得route.params.id可在组件props获取
       children: [
         {
           path: 'order',

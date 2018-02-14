@@ -26,5 +26,9 @@ export default {
 
   cityGroupDataSave (state, data) { // 存储所有城市列表
     state.cityGroupData = data
+  },
+
+  detailsHeightSave (state, height) { // 存储detailHeight
+    state.detailsHeight = height
   }
 }

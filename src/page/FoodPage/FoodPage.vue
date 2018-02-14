@@ -3,7 +3,7 @@
     <header class="details" :style="detailsStyle">
       <img :src="`${this.imgBaseUrl2}${this.shopDetailsData && this.shopDetailsData.image_path}`" class="headerBg">
       <div class="headerContent" ref="headerContent">
-        <span class="back">返回</span>
+        <router-link tag="span" to="/" class="back">返回</router-link>
         <div class="icon">
           <img :src="`${imgBaseUrl2}${shopDetailsData.image_path}`" alt="">
         </div>
@@ -27,14 +27,16 @@
       </div>
     </header>
     <div class="shopContent">
-      <ul class="title">
+      <ul class="title" ref="title">
         <router-link
           tag="li"
           :to="{name: item.className}"
-          v-for="item of titles"
+          v-for="(item, index) of titles"
           :key="item.className"
           :class="item.className">
-          <span :class="item.selected">{{item.title}}</span>
+          <v-touch tag="div" class="titleBox" @tap="selected(index)">
+            <span :class="item.selected">{{item.title}}</span>
+          </v-touch>
         </router-link>
       </ul>
       <router-view></router-view>
@@ -61,8 +63,8 @@
 </template>
 
 <script>
-import {shopDetails, foodMean} from '../../service/getData'
-import {mapState} from 'vuex'
+import {shopDetails} from '../../service/getData'
+import {mapState, mapMutations} from 'vuex'
 import {imgBaseUrl2} from '../../config/url'
 
 export default {
@@ -70,6 +72,13 @@ export default {
 
   components: {
     TopBack: () => import('../../components/common/TopBack')
+  },
+
+  props: {
+    id: {
+      type: [String, Number],
+      default: 1
+    }
   },
 
   data () {
@@ -82,7 +91,8 @@ export default {
         {title: '点餐', className: 'order', selected: {selected: true}},
         {title: '评价', className: 'evaluate', selected: {selected: false}},
         {title: '商家', className: 'merchant', selected: {selected: false}}
-      ]
+      ],
+      selectedNum: 0
     }
   },
 
@@ -92,8 +102,12 @@ export default {
         'background-image': `url(${this.imgBaseUrl2}${this.shopDetailsData && this.shopDetailsData.image_path})`,
         'background-size': 'cover',
         'background-repeat': 'no-repeat',
-        height: this.detailsHeight
+        height: this.detailsHeight + 'px'
       }
+    },
+
+    titleHeight () {
+      return this.$refs.title.offsetHeight
     },
 
     ...mapState([
@@ -105,20 +119,15 @@ export default {
   mounted () {
     this.shopDetailsDataGet()
     setTimeout(() => { // 推迟计算headerContent高度,精确度不够
-      this.detailsHeight = window.getComputedStyle(this.$refs.headerContent).height
+      this.detailsHeight = this.$refs.headerContent.offsetHeight
+      this.detailsHeightSave(this.detailsHeight + this.titleHeight)
     }, 100)
   },
 
   methods: {
     async shopDetailsDataGet () { // 获取商铺信息
-      let res = await shopDetails(this.$route.params.id, this.latitude, this.longitude)
+      let res = await shopDetails(this.id, this.latitude, this.longitude)
       this.shopDetailsData = res
-    },
-
-    async foodMeanGet () {
-      let res = await foodMean(this.$route.params.id)
-      this.foodMeanData = res
-      console.log(res)
     },
 
     activeShow () {
@@ -127,7 +136,17 @@ export default {
 
     activeClose () {
       this.actives = false
-    }
+    },
+
+    selected (index) {
+      this.titles[this.selectedNum].selected.selected = false
+      this.titles[index].selected.selected = true
+      this.selectedNum = index
+    },
+
+    ...mapMutations([
+      'detailsHeightSave'
+    ])
   }
 }
 </script>
@@ -212,13 +231,17 @@ export default {
       margin-top: 1px;
       border-bottom: 1px solid #a5a5a5;
       li {
-        display: flex;
         flex: auto;
-        justify-content: center;
         height: .3rem;
-        align-items: center;
         font-size: .16rem;
         color: #181818;
+        .titleBox {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
       }
       .selected {
         position: relative;
