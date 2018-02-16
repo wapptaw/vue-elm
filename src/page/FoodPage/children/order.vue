@@ -37,33 +37,33 @@
                   <span v-if="food.selectedNum > 0" class="foodSize">{{food.selectedNum}}</span>
                   <v-touch tag="span" class="foodSelect" v-if="food.specfoods.length > 1" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
                   <v-touch tag="span" class="foodAdd" v-else @tap="foodAdd(index, foodIndex, food.specfoods[0].price)">+</v-touch>
-                  <section v-if="food.specShow" class="specSelect">
-                    <h3 class="specTitle">规格</h3>
-                    <ul class="specs">
-                      <v-touch
-                        tag="li"
-                        v-for="(spec, specIndex) in food.specfoods"
-                        :key="spec.food_id"
-                        @tap="specSelect(index, foodIndex, specIndex)"
-                        class="spec">
-                        <span class="specName">{{spec.specs_name}}</span>
-                      </v-touch>
-                    </ul>
-                    <footer class="specFooter">
-                      <span class="specPrice">￥{{specPrice || food.specfoods[0].price}}</span>
-                      <section class="specCount">
-                        <span class="specReduce">-</span>
-                        <span class="specNum">{{specNum}}</span>
-                        <span class="specAdd">+</span>
-                      </section>
-                    </footer>
-                  </section>
                 </section>
               </footer>
             </div>
           </v-touch>
         </dl>
         <v-touch tag="div" class="fullScreen" v-if="shadowShow" @tap="shadowClose"></v-touch>
+        <section v-if="specShow" class="specSelect">
+          <h3 class="specTitle">规格</h3>
+          <ul class="specs">
+            <v-touch
+              tag="li"
+              v-for="(spec, specIndex) in specData"
+              :key="spec.food_id"
+              @tap="specSelect(specIndex)"
+              class="spec">
+              {{spec.specs_name}}
+            </v-touch>
+          </ul>
+          <footer class="specFooter">
+            <span class="specPrice">￥{{specPrice || specData[0].price}}</span>
+            <section class="specCount">
+              <v-touch tag="span" class="specReduce">-</v-touch>
+              <span class="specNum">{{specNum}}</span>
+              <v-touch tag="span" class="specAdd">+</v-touch>
+            </section>
+          </footer>
+        </section>
       </section>
     </div>
     <footer class="cartView" ref="cartView">我是底部</footer>
@@ -93,6 +93,8 @@ export default {
       footerHeight: '',
       foodNum: 0, // 总数量
       totalPrices: 0, // 总价
+      specShow: false,
+      specData: '',
       shadowShow: false,
       specPrice: '', // 规格价格
       specNum: 0 // 规格数
@@ -147,24 +149,19 @@ export default {
     },
 
     specSelectShow (index, foodIndex) {
-      this.foodMeanData[index].foods[foodIndex].specShow = true
+      this.specData = this.foodMeanData[index].foods[foodIndex].specfoods
+      this.specShow = true
       this.shadowShow = true
       this.specPrice = ''
     },
 
     shadowClose () {
       this.shadowShow = false
-      for (let val of this.foodMeanData) {
-        for (let food of val.foods) {
-          if (food.specfoods.length > 1) {
-            food.specShow = false
-          }
-        }
-      }
+      this.specShow = false
     },
 
-    specSelect (index, foodIndex, specIndex) {
-      this.specPrice = this.foodMeanData[index].foods[foodIndex].specfoods[specIndex].price
+    specSelect (specIndex) {
+      this.specPrice = this.specData[specIndex].price
       // this.specNum = 
     }
   }
@@ -176,6 +173,39 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  %Add {
+    width: .18rem;
+    height: .18rem;
+    font-size: .16rem;
+    border-radius: .09rem;
+    color: #fff;
+    background-color: #255cd1;
+    text-align: center;
+    line-height: .18rem;
+  }
+  %Reduce {
+    width: .18rem;
+    height: .18rem;
+    font-size: .16rem;
+    color: #525252;
+    border: 1px solid #525252;
+    border-radius: .09rem;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: .18rem;
+  }
+  %Number {
+    font-size: .16rem;
+    color: #444;
+    margin: 0 .08rem;
+    text-align: center;
+    line-height: .18rem;
+  }
+  %Price {
+    font-size: .16rem;
+    color: #e9451b;
+    font-weight: bold;
   }
   .fullScreen {
     width: 100%;
@@ -275,9 +305,7 @@ export default {
               display: flex;
               justify-content: space-between;
               .price {
-                font-size: .16rem;
-                color: #e9451b;
-                font-weight: bold;
+                @extend %Price;
               }
               .specifications {
                 display: flex;
@@ -292,47 +320,66 @@ export default {
                   line-height: .2rem;
                 }
                 .foodAdd {
-                  width: .18rem;
-                  height: .18rem;
-                  font-size: .16rem;
-                  border-radius: .09rem;
-                  color: #fff;
-                  background-color: #255cd1;
-                  text-align: center;
-                  line-height: .18rem;
+                  @extend %Add;
                 }
                 .foodReduce {
-                  width: .18rem;
-                  height: .18rem;
-                  font-size: .16rem;
-                  color: #525252;
-                  border: 1px solid #525252;
-                  border-radius: .09rem;
-                  box-sizing: border-box;
-                  text-align: center;
-                  line-height: .18rem;
+                  @extend %Reduce;
                 }
                 .foodSize {
-                  font-size: .16rem;
-                  color: #444444;
-                  margin: 0 .08rem;
-                  text-align: center;
-                  line-height: .18rem;
-                }
-                .specSelect {
-                  position: fixed;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%);
-                  width: 80%;
-                  height: 30%;
-                  background-color: #fff;
-                  border-radius: .05rem;
-                  z-index: 100;
-                  padding: .1rem;
-                  box-sizing: border-box;
+                  @extend %Number
                 }
               }
+            }
+          }
+        }
+      }
+      .specSelect {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        min-height: 30%;
+        background-color: #fff;
+        border-radius: .05rem;
+        z-index: 100;
+        padding: .1rem;
+        box-sizing: border-box;
+        .specTitle {
+          font-size: .16rem;
+          color: #272727;
+        }
+        .specs {
+          display: flex;
+          justify-content: space-between;
+          margin-top: .1rem;
+          .spec {
+            @extend %vc;
+            flex: auto;
+            border: 1px solid #14a2a7;
+            border-radius: .03rem;
+            margin:0 .05rem;
+            color: #494949;
+            line-height: 1.4em;
+          }
+        }
+        .specFooter {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 35%;
+          .specPrice {
+            @extend %Price;
+          }
+          .specCount {
+            display: flex;
+            .specReduce {
+              @extend %Reduce;
+            }
+            .specNum {
+              @extend %Number;
+            }
+            .specAdd {
+              @extend %Add;
             }
           }
         }
