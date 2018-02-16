@@ -18,10 +18,10 @@
               <span v-else>{{ address }}</span>
             </div>
           </router-link>
-          <div class="weather">
+          <!-- <div class="weather">
             <span>{{ weather.cond_txt }}</span>
             <span>{{ weather.temp }}</span>
-          </div>
+          </div> // 和风天气貌似不同源不能用，天气功能暂时挂掉 -->
         </header>
         <div
           ref="search"
@@ -189,7 +189,7 @@ export default {
   mounted () {
     this.getGeo()
     this.addressGet(this.geohashGet)
-    this.weatherGet(this.geohashGet)
+    // this.weatherGet(this.geohashGet) // 获取天气（暂时没法用）
     this.msiteFoodTypesGet(this.geohashGet)
     this.clientHeightGet()
   },

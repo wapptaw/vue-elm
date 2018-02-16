@@ -11,12 +11,12 @@
         </v-touch>
       </ul>
       <section class="food" :style="{height: foodMenuHeight}">
-        <dl v-for="menu in foodMeanData" :key="menu.id" class="foodCategory">
+        <dl v-for="(menu, index) in foodMeanData" :key="menu.id" class="foodCategory">
           <dt>
             <h2>{{menu.name}}</h2>
             <p>{{menu.description}}</p>
           </dt>
-          <v-touch tag="dd" v-for="food in menu.foods" :key="food.item_id" class="foodDetails">
+          <v-touch tag="dd" v-for="(food, foodIndex) in menu.foods" :key="food.item_id" class="foodDetails">
             <img :src="`${imgBaseUrl2}${food.image_path}`" alt="" class="foodIcon">
             <div class="foodDespriction">
               <h3 class="foodName">{{food.name}}</h3>
@@ -33,15 +33,37 @@
               <footer class="foodFooter">
                 <span class="price">￥{{food && food.specfoods[0].price}}</span>
                 <section class="specifications">
-                  <v-touch tag="span" class="foodReduce" v-if="foodNumShow" @tap="foodReduce(food.specfoods[0].price)">-</v-touch>
-                  <span v-if="foodNumShow" class="foodSize">{{foodNum}}</span>
-                  <v-touch tag="span" class="foodSelect" v-if="food.specifications.length !== 0">选择</v-touch>
-                  <v-touch tag="span" class="foodAdd" v-else @tap="foodAdd(food.specfoods[0].price)">+</v-touch>
+                  <v-touch tag="span" class="foodReduce" v-if="food.selectedNum > 0" @tap="foodReduce(index, foodIndex, food.specfoods[0].price)">-</v-touch>
+                  <span v-if="food.selectedNum > 0" class="foodSize">{{food.selectedNum}}</span>
+                  <v-touch tag="span" class="foodSelect" v-if="food.specfoods.length > 1" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
+                  <v-touch tag="span" class="foodAdd" v-else @tap="foodAdd(index, foodIndex, food.specfoods[0].price)">+</v-touch>
+                  <section v-if="food.specShow" class="specSelect">
+                    <h3 class="specTitle">规格</h3>
+                    <ul class="specs">
+                      <v-touch
+                        tag="li"
+                        v-for="(spec, specIndex) in food.specfoods"
+                        :key="spec.food_id"
+                        @tap="specSelect(index, foodIndex, specIndex)"
+                        class="spec">
+                        <span class="specName">{{spec.specs_name}}</span>
+                      </v-touch>
+                    </ul>
+                    <footer class="specFooter">
+                      <span class="specPrice">￥{{specPrice || food.specfoods[0].price}}</span>
+                      <section class="specCount">
+                        <span class="specReduce">-</span>
+                        <span class="specNum">{{specNum}}</span>
+                        <span class="specAdd">+</span>
+                      </section>
+                    </footer>
+                  </section>
                 </section>
               </footer>
             </div>
           </v-touch>
         </dl>
+        <v-touch tag="div" class="fullScreen" v-if="shadowShow" @tap="shadowClose"></v-touch>
       </section>
     </div>
     <footer class="cartView" ref="cartView">我是底部</footer>
@@ -69,18 +91,17 @@ export default {
       imgBaseUrl,
       imgBaseUrl2,
       footerHeight: '',
-      foodNum: 0,
-      totalPrices: 0
+      foodNum: 0, // 总数量
+      totalPrices: 0, // 总价
+      shadowShow: false,
+      specPrice: '', // 规格价格
+      specNum: 0 // 规格数
     }
   },
 
   computed: {
     foodMenuHeight () {
       return this.clientHeight - this.detailsHeight - this.footerHeight + 'px'
-    },
-
-    foodNumShow () {
-      return this.foodNum > 0
     },
 
     ...mapState([
@@ -99,23 +120,52 @@ export default {
   methods: {
     async foodMeanGet () {
       let res = await foodMean(this.id)
+      for (let val of res) {
+        for (let food of val.foods) {
+          food.selectedNum = 0
+          if (food.specfoods.length > 1) {
+            food.specShow = false
+          }
+        }
+      }
       this.foodMeanData = res
       console.log(res)
     },
 
-    foodAdd (price) {
+    foodAdd (index, foodIndex, price) {
       this.foodNum ++
       this.totalPrices += price
-      this.foodNumShow = true
+      this.foodMeanData[index].foods[foodIndex].selectedNum ++
     },
 
-    foodReduce (price) {
-      if (this.foodNum > 0) {
+    foodReduce (index, foodIndex, price) {
+      if (this.foodMeanData[index].foods[foodIndex].selectedNum > 0) {
         this.foodNum --
         this.totalPrices -= price
-      } else {
-        this.foodNumShow = false
+        this.foodMeanData[index].foods[foodIndex].selectedNum --
       }
+    },
+
+    specSelectShow (index, foodIndex) {
+      this.foodMeanData[index].foods[foodIndex].specShow = true
+      this.shadowShow = true
+      this.specPrice = ''
+    },
+
+    shadowClose () {
+      this.shadowShow = false
+      for (let val of this.foodMeanData) {
+        for (let food of val.foods) {
+          if (food.specfoods.length > 1) {
+            food.specShow = false
+          }
+        }
+      }
+    },
+
+    specSelect (index, foodIndex, specIndex) {
+      this.specPrice = this.foodMeanData[index].foods[foodIndex].specfoods[specIndex].price
+      // this.specNum = 
     }
   }
 }
@@ -126,6 +176,15 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+  .fullScreen {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .7);
+    z-index: 99;
   }
   .foodMenu {
     display: flex;
@@ -259,6 +318,19 @@ export default {
                   margin: 0 .08rem;
                   text-align: center;
                   line-height: .18rem;
+                }
+                .specSelect {
+                  position: fixed;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  width: 80%;
+                  height: 30%;
+                  background-color: #fff;
+                  border-radius: .05rem;
+                  z-index: 100;
+                  padding: .1rem;
+                  box-sizing: border-box;
                 }
               }
             }
