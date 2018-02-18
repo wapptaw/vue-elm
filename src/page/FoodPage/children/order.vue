@@ -3,15 +3,21 @@
     <div class="foodMenu">
       <ul class="menu" :style="{height: foodMenuHeight}">
         <v-touch tag="li"
-          v-for="menu in foodMeanData"
+          v-for="(menu, index) in foodMeanData"
           :key="menu.id"
+          @tap="menuSelected(index)"
+          :class="{menuSelectedStyle: menu.menuSelected }"
           class="menuItem">
           <img :src="`${imgBaseUrl}${menu.icon_url}.jpeg`" :alt="menu.icon_url" class="icon" v-if="menu.icon_url">
           <span class="menuName">{{menu.name}}</span>
         </v-touch>
       </ul>
       <section class="food" :style="{height: foodMenuHeight}">
-        <dl v-for="(menu, index) in foodMeanData" :key="menu.id" class="foodCategory">
+        <dl 
+          v-for="(menu, index) in foodMeanData"
+          :key="menu.id"
+          :id="index"
+          class="foodCategory">
           <dt>
             <h2>{{menu.name}}</h2>
             <p>{{menu.description}}</p>
@@ -130,8 +136,23 @@ export default {
             food.selectedNum = 0
           }
         }
+        val.menuSelected = false // 提前添加属性视图就能自动更新了
       }
+      res[0].menuSelected = true
       this.foodMeanData = res
+    },
+
+    menuSelected (index) {
+      this.foodMeanData.forEach((val, ind) => { // 这里只有两层，响应不管用，视图不能自动更新
+        if (index === ind) {
+          val.menuSelected = true
+          // this.$set(val, 'menuSelected', true) // 用了set问题解决，但是我还是感觉莫名其妙
+        } else {
+          val.menuSelected = false
+          // this.$set(val, 'menuSelected', false)
+        }
+      })
+      document.getElementById(index).scrollIntoView()
     },
 
     foodAdd (index, foodIndex, price) {
@@ -144,7 +165,7 @@ export default {
       if (this.foodMeanData[index].foods[foodIndex].selectedNum > 0) {
         this.foodNum --
         this.totalPrices -= price
-        this.foodMeanData[index].foods[foodIndex].selectedNum -- // 这里是4层，响应还管用
+        this.foodMeanData[index].foods[foodIndex].selectedNum -- // 这里是4层，响应还管用，就是这里没用set都管用才莫名其妙
       }
     },
 
@@ -172,7 +193,7 @@ export default {
     specSelect (specIndex) {
       this.specMark = specIndex
       this.specPrice = this.specData[specIndex].price
-      this.specData.forEach((val, index) => {
+      this.specData.forEach((val, index) => { // 还有这里，也没用set却没问题
         if (specIndex === index) {
           val.selected = true
         } else {
@@ -268,6 +289,17 @@ export default {
         .menuName {
           font-size: .14rem;
           color: #474747;
+        }
+      }
+      .menuSelectedStyle {
+        ::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 3px;
+          background-color: #1571bd;
         }
       }
     }
