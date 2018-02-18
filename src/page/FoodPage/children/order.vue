@@ -51,16 +51,17 @@
               v-for="(spec, specIndex) in specData"
               :key="spec.food_id"
               @tap="specSelect(specIndex)"
+              :class="{setStyle: spec.selected}"
               class="spec">
               {{spec.specs_name}}
             </v-touch>
           </ul>
           <footer class="specFooter">
-            <span class="specPrice">￥{{specPrice || specData[0].price}}</span>
+            <span class="specPrice">￥{{specData[specMark].price}}</span>
             <section class="specCount">
-              <v-touch tag="span" class="specReduce">-</v-touch>
-              <span class="specNum">{{specNum}}</span>
-              <v-touch tag="span" class="specAdd">+</v-touch>
+              <v-touch tag="span" class="specReduce" v-if="specData[specMark].selectedNum > 0" @tap="specReduce">-</v-touch>
+              <span class="specNum" v-if="specData[specMark].selectedNum > 0">{{specData[specMark].selectedNum}}</span>
+              <v-touch tag="span" class="specAdd" @tap="specAdd">+</v-touch>
             </section>
           </footer>
         </section>
@@ -96,8 +97,7 @@ export default {
       specShow: false,
       specData: '',
       shadowShow: false,
-      specPrice: '', // 规格价格
-      specNum: 0 // 规格数
+      specMark: 0 // 记录选中的spec选项的序号
     }
   },
 
@@ -124,14 +124,14 @@ export default {
       let res = await foodMean(this.id)
       for (let val of res) {
         for (let food of val.foods) {
-          food.selectedNum = 0
           if (food.specfoods.length > 1) {
             food.specShow = false
+          } else {
+            food.selectedNum = 0
           }
         }
       }
       this.foodMeanData = res
-      console.log(res)
     },
 
     foodAdd (index, foodIndex, price) {
@@ -144,15 +144,24 @@ export default {
       if (this.foodMeanData[index].foods[foodIndex].selectedNum > 0) {
         this.foodNum --
         this.totalPrices -= price
-        this.foodMeanData[index].foods[foodIndex].selectedNum --
+        this.foodMeanData[index].foods[foodIndex].selectedNum -- // 这里是4层，响应还管用
       }
     },
 
     specSelectShow (index, foodIndex) {
-      this.specData = this.foodMeanData[index].foods[foodIndex].specfoods
+      let data = this.foodMeanData[index].foods[foodIndex].specfoods
+      for (let val of data) {
+        if (!val.selectedNum) {
+          val.selectedNum = 0
+        }
+        val.selected = false
+      }
+      data[0].selected = true
+      this.specData = data
       this.specShow = true
       this.shadowShow = true
-      this.specPrice = ''
+      this.specPrice = 0
+      this.specMark = 0
     },
 
     shadowClose () {
@@ -161,8 +170,31 @@ export default {
     },
 
     specSelect (specIndex) {
+      this.specMark = specIndex
       this.specPrice = this.specData[specIndex].price
-      // this.specNum = 
+      this.specData.forEach((val, index) => {
+        if (specIndex === index) {
+          val.selected = true
+        } else {
+          val.selected = false
+        }
+      })
+    },
+
+    specAdd () {
+      this.foodNum ++
+      this.totalPrices += this.specData[this.specMark].price
+      // this.specData[this.specMark].selectedNum ++
+      this.$set(this.specData, this.specMark, Object.assign(this.specData[this.specMark], {selectedNum: this.specData[this.specMark].selectedNum + 1})) // 由于使用序号修改数组不支持响应,这里是6层，响应不管用所以用set
+    },
+
+    specReduce () {
+      if (this.specData[this.specMark].selectedNum > 0) {
+        this.foodNum --
+        this.totalPrices -= this.specData[this.specMark].price
+        // this.specData[this.specMark].selectedNum --
+        this.$set(this.specData, this.specMark, Object.assign(this.specData[this.specMark], {selectedNum: this.specData[this.specMark].selectedNum - 1}))
+      }
     }
   }
 }
@@ -351,6 +383,7 @@ export default {
         }
         .specs {
           display: flex;
+          flex-wrap: wrap;
           justify-content: space-between;
           margin-top: .1rem;
           .spec {
@@ -358,15 +391,19 @@ export default {
             flex: auto;
             border: 1px solid #14a2a7;
             border-radius: .03rem;
-            margin:0 .05rem;
+            margin:.02rem .05rem;
             color: #494949;
             line-height: 1.4em;
+          }
+          .setStyle {
+            border-color: #da1671;
+            color: #da1671;
           }
         }
         .specFooter {
           display: flex;
           justify-content: space-between;
-          margin-top: 35%;
+          margin-top: 30%;
           .specPrice {
             @extend %Price;
           }
