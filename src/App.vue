@@ -11,6 +11,7 @@ export default {
 </script>
 
 <style lang="scss">
-  @import './style/common';
+  @import './style/init';
+  @import './style/animation';
 </style>
 

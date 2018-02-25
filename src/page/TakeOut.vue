@@ -1,14 +1,17 @@
 <template>
   <div>
     <scroll
-      @posChange="keepSearchBox"
-      :listenScroll="listenScroll"
       :pullup="true"
       :pulldown="true"
+      :probeType="3"
+      :useTransition="false"
+      :scrollListen="true"
+      :data="[data.offset]"
+      class="wrap1"
+      :style="{height: heightWrap1}"
       @scrollToEnd="pullup"
       @pulldown="pulldown"
-      class="wrap1"
-      :style="{height: heightWrap1}">
+      @scroll="keepSearchBox">
       <div ref="transElm">
         <header class="header">
           <router-link to="AddressSearch" tag="div">
@@ -313,9 +316,9 @@ export default {
       this.clientHeightSave(document.documentElement.clientHeight)
     },
 
-    keepSearchBox (posY) {
-      if (posY <= -40) {
-        this.$refs.search.style.transform = `translateY(${-(posY + 40)}px)`
+    keepSearchBox (val) {
+      if (val.y <= -40) {
+        this.$refs.search.style.transform = `translateY(${-(val.y + 40)}px)`
       } else {
         this.$refs.search.style.transform = 'translateY(0)'
       }

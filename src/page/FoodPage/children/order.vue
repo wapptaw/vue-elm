@@ -3,7 +3,7 @@
     <div class="foodMenu">
       <ul class="menu" :style="{height: foodMenuHeight}">
         <v-touch tag="li"
-          v-for="(menu, index) in foodMeanData"
+          v-for="(menu, index) in foodMenuData"
           :key="menu.id"
           @tap="menuSelected(index)"
           :class="{menuSelectedStyle: menu.menuSelected }"
@@ -14,7 +14,7 @@
       </ul>
       <section class="food" :style="{height: foodMenuHeight}">
         <dl 
-          v-for="(menu, index) in foodMeanData"
+          v-for="(menu, index) in foodMenuData"
           :key="menu.id"
           :id="index"
           class="foodCategory">
@@ -39,8 +39,8 @@
               <footer class="foodFooter">
                 <span class="price">￥{{food && food.specfoods[0].price}}</span>
                 <section class="specifications">
-                  <v-touch tag="span" class="foodReduce" v-if="food.selectedNum > 0" @tap="foodReduce(index, foodIndex, food.specfoods[0].price)">-</v-touch>
-                  <span v-if="food.selectedNum > 0" class="foodSize">{{food.selectedNum}}</span>
+                  <v-touch tag="span" class="foodReduce" v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" @tap="foodReduce(index, foodIndex, food.specfoods[0].price)">-</v-touch>
+                  <span v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" class="foodSize">{{food.specfoods[0].selectedNum}}</span>
                   <v-touch tag="span" class="foodSelect" v-if="food.specfoods.length > 1" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
                   <v-touch tag="span" class="foodAdd" v-else @tap="foodAdd(index, foodIndex, food.specfoods[0].price)">+</v-touch>
                 </section>
@@ -48,7 +48,12 @@
             </div>
           </v-touch>
         </dl>
-        <v-touch tag="div" class="fullScreen" v-if="shadowShow" @tap="shadowClose"></v-touch>
+        <v-touch
+          tag="div"
+          class="fullScreen"
+          v-if="shadowShow"
+          @tap="shadowClose"
+          :style="{zIndex: tier}"></v-touch>
         <section v-if="specShow" class="specSelect">
           <h3 class="specTitle">规格</h3>
           <ul class="specs">
@@ -65,22 +70,48 @@
           <footer class="specFooter">
             <span class="specPrice">￥{{specData[specMark].price}}</span>
             <section class="specCount">
-              <v-touch tag="span" class="specReduce" v-if="specData[specMark].selectedNum > 0" @tap="specReduce">-</v-touch>
+              <v-touch tag="span" class="specReduce" v-if="specData[specMark].selectedNum > 0" @tap="foodReduce">-</v-touch>
               <span class="specNum" v-if="specData[specMark].selectedNum > 0">{{specData[specMark].selectedNum}}</span>
-              <v-touch tag="span" class="specAdd" @tap="specAdd">+</v-touch>
+              <v-touch tag="span" class="specAdd" @tap="foodAdd">+</v-touch>
             </section>
           </footer>
         </section>
       </section>
     </div>
-    <footer class="cartView" ref="cartView">我是底部</footer>
+    <transition name="slide">
+      <section v-if="carListShow" class="car" :style="{bottom: footerHeight + 'px'}">
+        <div class="cartViewTop">
+          <h2 class="title">购物车</h2>
+          <v-touch tag="span" class="carClear" @tap="carClear">清空</v-touch>
+        </div>
+        <transition-group tag="ul" class="foodItems" name="fade">
+          <li v-for="(item, index) in allFoods" :key="item.food_id" class="foodItem">
+            <section class="foodTitle">
+              <h3 class="title">{{item.name}}</h3>
+              <span v-if="item.specs_name" class="spec">{{item.specs_name}}</span>
+            </section>
+            <span class="price">￥{{item.selectedNum * item.price}}</span>
+            <section class="foodNum">
+              <v-touch tag="span" class="reduce" @tap="carReduce(index)">-</v-touch>
+              <span class="num">{{item.selectedNum}}</span>
+              <v-touch tag="span" class="add" @tap="carAdd(index)">+</v-touch>
+            </section>
+          </li>
+        </transition-group>
+      </section>
+    </transition>
+    <footer class="cartView" ref="cartView">
+      <v-touch tag="span" class="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
+      <span class="totalPrices">￥{{sum.totalPrices}}</span>
+      <span class="pay">付款</span>
+    </footer>
   </div>
 </template>
 
 <script>
-import {foodMean} from '../../../service/getData'
+import {foodMenu} from '../../../service/getData'
 import {imgBaseUrl, imgBaseUrl2} from '../../../config/url'
-import {mapState} from 'vuex'
+import {mapState, mapMutations} from 'vuex'
 
 export default {
   name: 'order',
@@ -94,16 +125,16 @@ export default {
 
   data () {
     return {
-      foodMeanData: '',
+      foodMenuData: '',
       imgBaseUrl,
       imgBaseUrl2,
       footerHeight: '',
-      foodNum: 0, // 总数量
-      totalPrices: 0, // 总价
       specShow: false,
       specData: '',
       shadowShow: false,
-      specMark: 0 // 记录选中的spec选项的序号
+      specMark: 0, // 记录选中的spec选项的序号
+      carListShow: false,
+      tier: 99 // 阴影层级
     }
   },
 
@@ -112,88 +143,167 @@ export default {
       return this.clientHeight - this.detailsHeight - this.footerHeight + 'px'
     },
 
+    allFoods () { // 购物车列表
+      let allFoods = []
+      for (let foodType of this.foodMenuData) {
+        for (let food of foodType.foods) {
+          for (let spec of food.specfoods) {
+            if (spec.selectedNum > 0) {
+              if (food.specfoods.length > 1) {
+                allFoods.push({
+                  name: spec.name,
+                  specs_name: spec.specs_name,
+                  price: spec.price,
+                  food_id: spec.food_id,
+                  get selectedNum () {
+                    return spec.selectedNum
+                  },
+                  set selectedNum (v) {
+                    spec.selectedNum = v
+                  }
+                })
+              } else {
+                allFoods.push({
+                  name: spec.name,
+                  price: spec.price,
+                  food_id: spec.food_id,
+                  get selectedNum () {
+                    return spec.selectedNum
+                  },
+                  set selectedNum (v) {
+                    spec.selectedNum = v
+                  }
+                })
+              }
+            }
+          }
+        }
+      }
+      return allFoods
+    },
+
+    sum () { // 总计
+      let foodNum = 0
+      let totalPrices = 0
+      for (let v of this.allFoods) {
+        foodNum += v.selectedNum
+        totalPrices += v.selectedNum * v.price
+      }
+      return {
+        foodNum,
+        totalPrices
+      }
+    },
+
     ...mapState([
       'detailsHeight',
-      'clientHeight'
+      'clientHeight',
+      'foodMenu'
     ])
   },
 
+  watch: {
+    allFoods (newV) {
+      if (newV.length === 0) {
+        this.shadowShow = false
+        this.carListShow = false
+      }
+    }
+  },
+
   mounted () {
-    this.foodMeanGet()
+    this.foodMenuGet()
     this.$nextTick(() => {
       this.footerHeight = this.$refs.cartView.offsetHeight
     })
   },
 
+  beforeRouteLeave (to, from, next) {
+    this.foodMenuDataSave({
+      foodMenuData: this.foodMenuData,
+      shopId: this.id})
+    next()
+  },
+
   methods: {
-    async foodMeanGet () {
-      let res = await foodMean(this.id)
-      for (let val of res) {
-        for (let food of val.foods) {
-          if (food.specfoods.length > 1) {
-            food.specShow = false
-          } else {
-            food.selectedNum = 0
+    async foodMenuGet () {
+      try {
+        if (this.foodMenu[this.id]) {
+          this.foodMenuData = this.foodMenu[this.id]
+        } else {
+          let res = await foodMenu(this.id)
+          for (let val of res) {
+            for (let food of val.foods) {
+              for (let spec of food.specfoods) {
+                spec.selectedNum = 0
+              }
+            }
+            val.menuSelected = false // 提前添加属性视图就能自动更新了
           }
+          res[0].menuSelected = true
+          this.foodMenuData = res
         }
-        val.menuSelected = false // 提前添加属性视图就能自动更新了
+      } catch (e) {
+        throw new Error(e)
       }
-      res[0].menuSelected = true
-      this.foodMeanData = res
     },
 
     menuSelected (index) {
-      this.foodMeanData.forEach((val, ind) => { // 这里只有两层，响应不管用，视图不能自动更新
+      this.foodMenuData.forEach((val, ind) => {
         if (index === ind) {
           val.menuSelected = true
-          // this.$set(val, 'menuSelected', true) // 用了set问题解决，但是我还是感觉莫名其妙
         } else {
           val.menuSelected = false
-          // this.$set(val, 'menuSelected', false)
         }
       })
       document.getElementById(index).scrollIntoView()
     },
 
-    foodAdd (index, foodIndex, price) {
-      this.foodNum ++
-      this.totalPrices += price
-      this.foodMeanData[index].foods[foodIndex].selectedNum ++
+    foodAdd (index, foodIndex) {
+      let specfoods
+      if (this.specData) {
+        specfoods = this.specData
+      } else {
+        specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
+      }
+      specfoods[this.specMark].selectedNum ++
     },
 
-    foodReduce (index, foodIndex, price) {
-      if (this.foodMeanData[index].foods[foodIndex].selectedNum > 0) {
-        this.foodNum --
-        this.totalPrices -= price
-        this.foodMeanData[index].foods[foodIndex].selectedNum -- // 这里是4层，响应还管用，就是这里没用set都管用才莫名其妙
+    foodReduce (index, foodIndex) {
+      let specfoods
+      if (this.specData) {
+        specfoods = this.specData
+      } else {
+        specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
+      }
+      if (specfoods[this.specMark].selectedNum > 0) {
+        specfoods[this.specMark].selectedNum --
       }
     },
 
     specSelectShow (index, foodIndex) {
-      let data = this.foodMeanData[index].foods[foodIndex].specfoods
-      for (let val of data) {
-        if (!val.selectedNum) {
-          val.selectedNum = 0
-        }
-        val.selected = false
+      let specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
+      for (let spec of specfoods) {
+        spec.selected = false
       }
-      data[0].selected = true
-      this.specData = data
+      specfoods[0].selected = true
+      this.specData = specfoods
       this.specShow = true
       this.shadowShow = true
-      this.specPrice = 0
-      this.specMark = 0
+      this.tier = 101
     },
 
     shadowClose () {
       this.shadowShow = false
       this.specShow = false
+      this.specMark = 0
+      this.specData = ''
+      this.carListShow = false
     },
 
     specSelect (specIndex) {
       this.specMark = specIndex
-      this.specPrice = this.specData[specIndex].price
-      this.specData.forEach((val, index) => { // 还有这里，也没用set却没问题
+      this.specData.forEach((val, index) => {
         if (specIndex === index) {
           val.selected = true
         } else {
@@ -202,21 +312,36 @@ export default {
       })
     },
 
-    specAdd () {
-      this.foodNum ++
-      this.totalPrices += this.specData[this.specMark].price
-      // this.specData[this.specMark].selectedNum ++
-      this.$set(this.specData, this.specMark, Object.assign(this.specData[this.specMark], {selectedNum: this.specData[this.specMark].selectedNum + 1})) // 由于使用序号修改数组不支持响应,这里是6层，响应不管用所以用set
+    carClear () {
+      for (let v of this.allFoods) {
+        v.selectedNum = 0
+      }
     },
 
-    specReduce () {
-      if (this.specData[this.specMark].selectedNum > 0) {
-        this.foodNum --
-        this.totalPrices -= this.specData[this.specMark].price
-        // this.specData[this.specMark].selectedNum --
-        this.$set(this.specData, this.specMark, Object.assign(this.specData[this.specMark], {selectedNum: this.specData[this.specMark].selectedNum - 1}))
+    carReduce (index) {
+      if (this.allFoods[index].selectedNum > 0) {
+        this.allFoods[index].selectedNum --
       }
-    }
+    },
+
+    carAdd (index) {
+      this.allFoods[index].selectedNum ++
+    },
+
+    carShow () {
+      if (this.allFoods.length > 0 && !this.carListShow) {
+        this.carListShow = true
+        this.shadowShow = true
+        this.tier = 99
+      } else {
+        this.carListShow = false
+        this.shadowShow = false
+      }
+    },
+
+    ...mapMutations([
+      'foodMenuDataSave'
+    ])
   }
 }
 </script>
@@ -267,7 +392,6 @@ export default {
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, .7);
-    z-index: 99;
   }
   .foodMenu {
     display: flex;
@@ -309,6 +433,7 @@ export default {
       overflow-y: auto;
       box-sizing: border-box;
       border-left: 1px solid #a5a5a5;
+      scroll-behavior: smooth;
       .foodCategory {
         dt {
           height: .35rem;
@@ -406,7 +531,7 @@ export default {
         min-height: 30%;
         background-color: #fff;
         border-radius: .05rem;
-        z-index: 100;
+        z-index: 102;
         padding: .1rem;
         box-sizing: border-box;
         .specTitle {
@@ -460,7 +585,100 @@ export default {
     width: 100%;
     position: fixed;
     bottom: 0;
-    background-color: #000;
+    background-color: #e0e0e0;
+    border-top: 1px solid #949393;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    & > span {
+      flex: auto;
+      @extend %vc;
+    }
+    .foodNum {
+      color: #277be9;
+    }
+    .totalPrices {
+      color: #ee4d0d;
+      font-weight: bold;
+    }
+    .pay {
+      background-color: #d43e3e;
+      height: 100%;
+      color: #fff;
+    }
+  }
+  .car {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    z-index: 100;
+    .cartViewTop {
+      height: .4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #d6d6d6;
+      border-bottom: 1px solid #bbb;
+      padding: 0 .1rem;
+      .title {
+        font-size: .16rem;
+        color: #1251a3;
+      }
+      .carClear {
+        font-size: .13rem;
+        color: #ec3f3f;
+        line-height: .4rem;
+      }
+    }
+    .foodItems {
+      max-height: 3.2rem;
+      overflow-y: auto;
+      .foodItem {
+        display: flex;
+        align-items: center;
+        height: .4rem;
+        padding: 0 .1rem;
+        .foodTitle {
+          display: flex;
+          align-items: baseline;
+          flex: 1 1 33%;
+          .title {
+            font-size: .18rem;
+            font-weight: bold;
+            color: #575757;
+          }
+          .spec {
+            font-size: .12rem;
+            color: #8a8a8a;
+            margin-left: .05rem;
+          }
+        }
+        .price {
+          @extend %vc;
+          flex: 1 0 33%;
+          color: #ee4d0d;
+          font-weight: bold;
+          font-size: .14rem;
+        }
+        .foodNum {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          flex: 1 1 33%;
+          .reduce {
+            @extend %Reduce;
+          }
+          .num {
+            @extend %Number;
+          }
+          .add {
+            @extend %Add;
+          }
+        }
+      }
+    }
   }
 </style>
 

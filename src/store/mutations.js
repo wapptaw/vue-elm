@@ -30,5 +30,9 @@ export default {
 
   detailsHeightSave (state, height) { // 存储detailHeight
     state.detailsHeight = height
+  },
+
+  foodMenuDataSave (state, foodMenuData) { // 存储foodMenuData
+    state.foodMenu[foodMenuData.shopId] = foodMenuData.foodMenuData
   }
 }

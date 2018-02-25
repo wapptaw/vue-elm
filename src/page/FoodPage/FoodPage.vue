@@ -118,16 +118,16 @@ export default {
 
   mounted () {
     this.shopDetailsDataGet()
-    setTimeout(() => { // 推迟计算headerContent高度,精确度不够
-      this.detailsHeight = this.$refs.headerContent.offsetHeight
-      this.detailsHeightSave(this.detailsHeight + this.titleHeight)
-    }, 100)
   },
 
   methods: {
     async shopDetailsDataGet () { // 获取商铺信息
       let res = await shopDetails(this.id, this.latitude, this.longitude)
       this.shopDetailsData = res
+      this.$nextTick(() => {
+        this.detailsHeight = this.$refs.headerContent.offsetHeight
+        this.detailsHeightSave(this.detailsHeight + this.titleHeight)
+      })
     },
 
     activeShow () {
@@ -189,8 +189,12 @@ export default {
       width: 100%;
       box-sizing: border-box;
       .back {
-        position: absolute;
-        left: 0;
+        position: fixed;
+        left: .05rem;
+        top: 0;
+        color: #fff;
+        font-size: .2rem;
+
       }
       .icon {
         width: 20%;
@@ -303,15 +307,6 @@ export default {
       color: #fff;
       background-color: rgba(0, 0, 0, 0.3);
     }
-  }
-  .slide-enter, .slide-leave-to {
-    transform: translateY(100%);
-  }
-  .slide-enter-active, .slide-leave-active {
-    transition: transform .2s ease-out;
-  }
-  .slide-enter-to, .slide-leave {
-    transform: translateY(0);
   }
 </style>
 

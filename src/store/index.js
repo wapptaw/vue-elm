@@ -16,7 +16,8 @@ const state = {
   clientHeight: '', // 屏幕高度
   historyList: [], // 搜索记录
   cityGroupData: {}, // 城市列表
-  detailsHeight: '' // foodPage页面header高度
+  detailsHeight: '', // foodPage页面header高度
+  foodMenu: {} // order页数据
 }
 
 export default new Vuex.Store({

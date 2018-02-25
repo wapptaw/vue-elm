@@ -11,71 +11,50 @@
     name: 'scroll',
 
     props: {
-      probeType: {
-        type: Number,
-        default: 1
-      },
-      click: {
+      click: { // 是否响应点击事件
         type: Boolean,
         default: true
-      },
-      scrollX: {
-        type: Boolean,
-        default: false
-      },
-      scrollY: {
-        type: Boolean,
-        default: true
-      },
-      listenScroll: {
-        type: Boolean,
-        default: false
-      },
-      data: {
-        type: Array,
-        default: null
-      },
-      pullup: {
-        type: Boolean,
-        default: false
-      },
-      pulldown: {
-        type: Boolean,
-        default: false
-      },
-      beforeScroll: {
-        type: Boolean,
-        default: false
-      },
-      refreshDelay: {
-        type: Number,
-        default: 20
       },
       useTransition: {
         type: Boolean,
-        default: false
+        default: true //
+      },
+      probeType: {
+        type: Number,
+        default: 0
       },
       pullUpLoad: {
         type: [Boolean, Object],
         default: false
       },
-      pullingUp: {
+
+      pullup: { // 是否可上拉
         type: Boolean,
         default: false
+      },
+      pulldown: { // 是否可下拉
+        type: Boolean,
+        default: false
+      },
+      refreshDelay: { // 刷新延时
+        type: Number,
+        default: 20
+      },
+      scrollListen: {
+        type: Boolean,
+        default: false
+      },
+      data: {
+        type: Array,
+        default () {
+          return []
+        }
       }
     },
 
     data () {
       return {
         scroll: ''
-      }
-    },
-
-    computed: {
-      posY () {
-        if (this.scroll) {
-          return this.scroll.y
-        }
       }
     },
 
@@ -90,21 +69,13 @@
         if (!this.$refs.wrapper) return
 
         this.scroll = new BScroll(this.$refs.wrapper, {
-          probeType: this.probeType,
           click: this.click,
-          scrollX: this.scrollX,
-          scrollY: this.scrollY,
           useTransition: this.useTransition,
+          probeType: this.probeType,
           pullUpLoad: this.pullUpLoad
         })
 
-        if (this.listenScroll) {
-          this.scroll.on('scroll', pos => {
-            this.$emit('scroll', pos, this)
-          })
-        }
-
-        if (this.pullup) { // 上拉
+        if (this.pullup) { // 上拉，手指离开屏幕后
           this.scroll.on('scrollEnd', () => {
             if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
               this.$emit('scrollToEnd')
@@ -112,13 +83,7 @@
           })
         }
 
-        if (this.pullingUp) { // 上拉（只激活一次）
-          this.scroll.on('pullingUp', () => {
-            this.$emit('pullingUp')
-          })
-        }
-
-        if (this.pulldown) { // 下拉
+        if (this.pulldown) { // 下拉，手指离开屏幕后
           this.scroll.on('touchEnd', pos => {
             if (pos.y > 50) {
               this.$emit('pulldown')
@@ -126,31 +91,21 @@
           })
         }
 
-        if (this.beforeScroll) {
-          this.scroll.on('beforeScrollStart', () => {
-            this.$emit('beforeScroll')
+        if (this.scrollListen) {
+          this.scroll.on('scroll', val => {
+            this.$emit('scroll', val)
+          })
+        }
+
+        if (this.pullUpLoad) { // 上拉
+          this.scroll.on('pullingUp', () => {
+            this.$emit('pullingUp', this.scroll)
           })
         }
       },
 
-      disable () {
-        this.scroll && this.scroll.disable()
-      },
-
-      enable () {
-        this.scroll && this.scroll.enable()
-      },
-
       refresh () {
         this.scroll && this.scroll.refresh()
-      },
-
-      scrollTo () {
-        this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
-      },
-
-      scrollToElement () {
-        this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments)
       }
     },
 
@@ -159,12 +114,7 @@
         setTimeout(() => {
           this.refresh()
         }, this.refreshDelay)
-      },
-
-      posY (newPosY) {
-        this.$emit('posChange', newPosY) // 监听y轴变化
       }
     }
   }
 </script>
-

@@ -76,7 +76,7 @@ export const shopDetails = (shopId, latitude, longitude) => fetch(`${baseUrl}/sh
   longitude: `${longitude}`
 }) // 商铺详情
 
-export const foodMean = restaurantId => fetch(`${baseUrl}/shopping/v2/menu`, {
+export const foodMenu = restaurantId => fetch(`${baseUrl}/shopping/v2/menu`, {
   restaurant_id: restaurantId
 }) // shop页面菜单列表
 

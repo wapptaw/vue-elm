@@ -47,7 +47,8 @@ export default new Router({
         {
           path: 'order',
           name: 'order',
-          component: order
+          component: order,
+          props: true
         },
         {
           path: 'evaluate',
