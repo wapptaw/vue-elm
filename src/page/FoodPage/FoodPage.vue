@@ -3,7 +3,7 @@
     <header class="details" :style="detailsStyle">
       <img :src="`${this.imgBaseUrl2}${this.shopDetailsData && this.shopDetailsData.image_path}`" class="headerBg">
       <div class="headerContent" ref="headerContent">
-        <router-link tag="span" to="/" class="back">返回</router-link>
+        <router-link tag="span" :to="{name: 'takeOut'}" class="back">返回</router-link>
         <div class="icon">
           <img :src="`${imgBaseUrl2}${shopDetailsData.image_path}`" alt="">
         </div>
@@ -71,7 +71,7 @@ export default {
   name: 'FoodPage',
 
   components: {
-    TopBack: () => import('../../components/common/TopBack')
+    TopBack: async () => import('../../components/common/TopBack')
   },
 
   props: {
@@ -124,6 +124,7 @@ export default {
     async shopDetailsDataGet () { // 获取商铺信息
       let res = await shopDetails(this.id, this.latitude, this.longitude)
       this.shopDetailsData = res
+      this.shopDetailsDataSave(res)
       this.$nextTick(() => {
         this.detailsHeight = this.$refs.headerContent.offsetHeight
         this.detailsHeightSave(this.detailsHeight + this.titleHeight)
@@ -145,7 +146,8 @@ export default {
     },
 
     ...mapMutations([
-      'detailsHeightSave'
+      'detailsHeightSave',
+      'shopDetailsDataSave'
     ])
   }
 }
@@ -233,7 +235,7 @@ export default {
       display: flex;
       justify-content: space-between;
       margin-top: 1px;
-      border-bottom: 1px solid #a5a5a5;
+      border-bottom: 1px solid #cecece;
       li {
         flex: auto;
         height: .3rem;

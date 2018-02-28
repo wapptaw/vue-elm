@@ -12,7 +12,7 @@
       @scrollToEnd="pullup"
       @pulldown="pulldown"
       @scroll="keepSearchBox">
-      <div ref="transElm">
+      <div>
         <header class="header">
           <router-link to="AddressSearch" tag="div">
             <div class="geolocation">
@@ -86,26 +86,20 @@
         </div>
       </div>
     </scroll>
-    <footer
-      class="footer"
-      :style="{height: footerHeight}"></footer>
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
-import { getAddress, getWeather, msiteFoodTypes } from '../service/getData'
-import { imgBaseUrl } from '../config/url'
-// import ShopList from '../components/common/ShopList'
-import { switchRem } from '../config/rem'
-import scroll from '../components/common/scroll'
+import { getAddress, getWeather, msiteFoodTypes } from '../../../service/getData'
+import { imgBaseUrl } from '../../../config/url'
 
 export default {
   name: 'TakeOut',
 
   components: {
-    ShopList: async () => import('../components/common/ShopList'), // 异步加载组件
-    scroll
+    ShopList: async () => import('../../../components/common/ShopList'), // 异步加载组件
+    scroll: async () => import('../../../components/common/scroll')
   },
 
   data () {
@@ -127,13 +121,13 @@ export default {
       position2: '100%',
       trans: '',
       clientHeight: '',
-      footerHeight: '.55rem',
       listenScroll: true,
       refreshContral: true,
       offsetLimit: true,
       data: {
         offset: 0
-      }
+      },
+      footerHeight: ''
     }
   },
 
@@ -170,13 +164,14 @@ export default {
     },
 
     heightWrap1 () {
-      return `${switchRem(this.clientHeight) - switchRem(this.footerHeight)}rem`
+      return `${this.clientHeight - this.btmNavH}px`
     },
 
     ...mapState([
       'latitude',
       'longitude',
-      'geohash'
+      'geohash',
+      'btmNavH'
     ])
   },
 
@@ -312,8 +307,8 @@ export default {
     },
 
     clientHeightGet () { // 获取屏幕高度
-      this.clientHeight = `${document.documentElement.clientHeight}px`
-      this.clientHeightSave(document.documentElement.clientHeight)
+      this.clientHeight = document.documentElement.clientHeight
+      this.clientHeightSave(this.clientHeight)
     },
 
     keepSearchBox (val) {
@@ -447,9 +442,5 @@ export default {
   }
   .wrap1 {
     overflow-y: hidden;
-  }
-  .footer {
-    width: 100%;
-    background-color: #000;
   }
 </style>

@@ -11,10 +11,10 @@
 </template>
 
 <script>
-import TopBack from '../components/common/TopBack'
-import SearchBox from '../components/common/SearchBox'
-import ShopList from '../components/common/ShopList'
-import {searchRestaurant} from '../service/getData'
+import TopBack from '../../../components/common/TopBack'
+import SearchBox from '../../../components/common/SearchBox'
+import ShopList from '../../../components/common/ShopList'
+import {searchRestaurant} from '../../../service/getData'
 import {mapState} from 'vuex'
 
 export default {
@@ -48,6 +48,7 @@ export default {
       let topContent = this.$refs.topContent
       this.topContentHeight = topContent.offsetHeight
     })
+
   },
 
   methods: {

@@ -75,7 +75,7 @@
       </ul>
     </section>
   </div>
-  <transition name="fade">
+  <transition name="pullend">
     <div v-if="arriveBtm" class="without">没有了</div>
   </transition>
 </scroll>
@@ -90,7 +90,7 @@ export default {
   name: 'evaluate',
 
   components: {
-    scroll: () => import('../../../components/common/scroll')
+    scroll: async () => import('../../../components/common/scroll')
   },
 
   filters: {

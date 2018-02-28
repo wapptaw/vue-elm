@@ -8,19 +8,36 @@
 .slide-enter-to, .slide-leave {
   transform: translateY(0);
 }
+// 右侧滑入/滑出
+.right-slide-enter, .right-slide-leave-to {
+  transform: translateX(100%);
+}
+.right-slide-enter-active, .right-slide-leave-active {
+  transition: transform .2 ease-out;
+}
+.right-slide-enter-to, .slide-leave {
+  transform: translateX(0);
+}
 // 淡入淡出
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
-// .fade-enter-active, .fade-leave-active {
-//   transition: opacity 1s ease-in;
-// }
-.fade-enter-active {
-  transition: opacity .2s ease-out;
-}
-.fade-leave-active {
-  transition: opacity 1s ease-in;
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s ease-in;
 }
 .fade-enter-to, .fade-leave {
+  opacity: 1;
+}
+// 拉到底动画
+.pullend-enter, .pullend-leave-to {
+  opacity: 0;
+}
+.pullend-enter-active {
+  transition: opacity .2s ease-out;
+}
+.pullend-leave-active {
+  transition: opacity 1s ease-in;
+}
+.pullend-enter-to, .pullend-leave {
   opacity: 1;
 }

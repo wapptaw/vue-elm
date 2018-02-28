@@ -1,5 +1,5 @@
 <template>
-  <div class="back">
+  <div class="back" :style="{height: backHeight}">
     <v-touch tag="a" class="btn" @tap="goBack">返回</v-touch>
     {{title}}
     <slot></slot>
@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import {mapMutations} from 'vuex'
+
 export default { // 返回栏
   name: 'TopBack',
 
@@ -17,10 +19,30 @@ export default { // 返回栏
     }
   },
 
+  data () {
+    return {
+      backHeightVal: 40
+    }
+  },
+
+  computed: {
+    backHeight () {
+      return this.backHeightVal + 'px'
+    }
+  },
+
+  mounted () {
+    this.backHeightSave(this.backHeightVal)
+  },
+
   methods: {
     goBack () {
       this.$router.go(-1)
-    }
+    },
+
+    ...mapMutations([
+      'backHeightSave'
+    ])
   }
 }
 </script>
@@ -28,7 +50,6 @@ export default { // 返回栏
 <style lang="scss" scoped>
   .back {
     width: 100%;
-    height: .4rem;
     line-height: .4rem;
     font-size: .15rem;
     background-color: #0f96e4;

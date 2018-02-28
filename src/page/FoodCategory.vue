@@ -14,7 +14,7 @@ export default {
 
   components: {
     TopBack,
-    ShopList: () => import('../components/common/ShopList')
+    ShopList: async () => import('../components/common/ShopList')
   },
 
   computed: {

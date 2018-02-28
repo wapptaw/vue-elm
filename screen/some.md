@@ -72,3 +72,6 @@
 > 内容 (复写元素的内容)
 * v-html
 * v-text
+13. better-scroll写一些实例
+14. fixed跟transform冲突
+15. vue组件最外层元素最好不要设置class，因为可能造成class污染

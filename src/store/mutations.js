@@ -16,6 +16,10 @@ export default {
     state.clientHeight = clientHeight
   },
 
+  backHeightSave (state, backHeight) { // 存储TopBack高度
+    state.backHeight = backHeight
+  },
+
   historyListSave (state, history) { // 存储地址搜索记录
     state.historyList.push(history)
   },
@@ -32,7 +36,15 @@ export default {
     state.detailsHeight = height
   },
 
+  shopDetailsDataSave (state, shopDetailsData) { // 存储shopDetailsData
+    state.shopDetailsData = shopDetailsData
+  },
+
   foodMenuDataSave (state, foodMenuData) { // 存储foodMenuData
     state.foodMenu[foodMenuData.shopId] = foodMenuData.foodMenuData
+  },
+
+  bottomNavHeightSave (state, btmNavH) { // 存储bottomNav高度
+    state.btmNavH = btmNavH
   }
 }
