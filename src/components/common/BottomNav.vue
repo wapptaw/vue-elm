@@ -65,7 +65,6 @@ export default {
   },
 
   mounted () {
-    this.bottomNavHeightSave(55) // 保存高度
     this.$emit('heightGet', 55)
   },
 

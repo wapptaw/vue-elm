@@ -1,14 +1,14 @@
 <template>
   <div>
-    <section :style="{height: homeMainH}" class="homeMain">
+    <section :style="{height: homeMainH, overflowY: 'hidden'}" class="homeMain">
       <router-view></router-view>
     </section>
-    <BottomNav @heightGet="heightGet"></BottomNav>
+    <BottomNav @heightGet="btmNavHGet"></BottomNav>
   </div>
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import {mapMutations} from 'vuex'
 
 export default {
   name: 'home',
@@ -18,27 +18,35 @@ export default {
   },
 
   data () {
-    btmNavH: 0
+    return {
+      btmNavH: 0,
+      clientHeight: 0
+    }
   },
 
   computed: {
     homeMainH () {
-
-    },
-
-    ...mapState([
-      'clientHeight'
-    ])
+      return this.clientHeight - this.btmNavH + 'px'
+    }
   },
 
   mounted () {
-    this.heightGet()
+    this.clientHeightGet()
   },
 
   methods: {
-    heightGet (val) {
+    btmNavHGet (val) {
       this.btmNavH = val
-    }
+    },
+
+    clientHeightGet () { // 获取屏幕高度
+      this.clientHeight = document.documentElement.clientHeight
+      this.clientHeightSave(this.clientHeight)
+    },
+
+    ...mapMutations([
+      'clientHeightSave'
+    ])
   }
 }
 </script>

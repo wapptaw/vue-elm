@@ -48,7 +48,6 @@ export default {
       let topContent = this.$refs.topContent
       this.topContentHeight = topContent.offsetHeight
     })
-
   },
 
   methods: {

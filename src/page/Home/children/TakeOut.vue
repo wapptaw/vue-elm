@@ -1,92 +1,89 @@
 <template>
-  <div>
-    <scroll
-      :pullup="true"
-      :pulldown="true"
-      :probeType="3"
-      :useTransition="false"
-      :scrollListen="true"
-      :data="[data.offset]"
-      class="wrap1"
-      :style="{height: heightWrap1}"
-      @scrollToEnd="pullup"
-      @pulldown="pulldown"
-      @scroll="keepSearchBox">
+  <scroll
+    :pullup="true"
+    :pulldown="true"
+    :probeType="3"
+    :useTransition="false"
+    :scrollListen="true"
+    :watcherData="watcherData"
+    class="wrap1"
+    @scrollToEnd="pullup"
+    @pulldown="pulldown"
+    @scroll="keepSearchBox">
+    <div>
+      <header class="header">
+        <router-link to="AddressSearch" tag="div">
+          <div class="geolocation">
+            <span v-if="loading">定位中...</span>
+            <span v-else-if="locationFailure">{{ failure }}</span>
+            <span v-else>{{ address }}</span>
+          </div>
+        </router-link>
+        <!-- <div class="weather">
+          <span>{{ weather.cond_txt }}</span>
+          <span>{{ weather.temp }}</span>
+        </div> // 和风天气貌似不同源不能用，天气功能暂时挂掉 -->
+      </header>
+      <div
+        ref="search"
+        class="search">
+        <router-link to="ShopSearch">
+          <input type="button" value="开始寻找美食">
+        </router-link>
+      </div>
       <div>
-        <header class="header">
-          <router-link to="AddressSearch" tag="div">
-            <div class="geolocation">
-              <span v-if="loading">定位中...</span>
-              <span v-else-if="locationFailure">{{ failure }}</span>
-              <span v-else>{{ address }}</span>
-            </div>
-          </router-link>
-          <!-- <div class="weather">
-            <span>{{ weather.cond_txt }}</span>
-            <span>{{ weather.temp }}</span>
-          </div> // 和风天气貌似不同源不能用，天气功能暂时挂掉 -->
-        </header>
-        <div
-          ref="search"
-          class="search">
-          <router-link to="ShopSearch">
-            <input type="button" value="开始寻找美食">
-          </router-link>
-        </div>
-        <div>
-          <nav class="nav">
-            <v-touch
-              @swipeleft="menuSlideLeft"
-              @swiperight="menuSlideRight"
-              :swipe-options="{direction: 'horizontal', threshold: 100}"
-              :enabled="true">
-              <ul  
-                :style="{left: position1, transition: trans}"
-                @transitionend = "transEnd1"
-                class="foodNav">
-                <router-link
-                  :to="{path: `/FoodCategory/${item.title}`, query: {restaurantCategoryId: item.id, restaurantCategoryTitle: item.title}}" 
-                  tag="li"
-                  v-for="item in msite1"
-                  :key="item.id">
-                  <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
-                  <p>{{ item.title }}</p>
-                </router-link>
-              </ul>
-            </v-touch>
-            <ul
-              v-if="visible"
-              :style="{left: position2, transition: trans}"
-              @transitionend = "transEnd2"
+        <nav class="nav">
+          <v-touch
+            @swipeleft="menuSlideLeft"
+            @swiperight="menuSlideRight"
+            :swipe-options="{direction: 'horizontal', threshold: 100}"
+            :enabled="true">
+            <ul  
+              :style="{left: position1, transition: trans}"
+              @transitionend = "transEnd1"
               class="foodNav">
               <router-link
-                to=""
+                :to="{path: `/FoodCategory/${item.title}`, query: {restaurantCategoryId: item.id, restaurantCategoryTitle: item.title}}" 
                 tag="li"
-                v-for="item in msite2"
+                v-for="item in msite1"
                 :key="item.id">
                 <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
                 <p>{{ item.title }}</p>
               </router-link>
             </ul>
-            <ul class="mark">
-              <li
-                v-for="(item, key) in mark" 
-                :key="key"
-                :style="{backgroundColor: item.color}">
-              </li>
-            </ul>
-          </nav>
-          <div
-            class="shopList">
-            <shop-list
-              :offset="data.offset"
-              :refreshContral="refreshContral"
-              @listenOffset="listenOffset"></shop-list>
-          </div>
+          </v-touch>
+          <ul
+            v-if="visible"
+            :style="{left: position2, transition: trans}"
+            @transitionend = "transEnd2"
+            class="foodNav">
+            <router-link
+              to=""
+              tag="li"
+              v-for="item in msite2"
+              :key="item.id">
+              <img :src="imgBaseUrl+item.image_url" :title="item.description" :alt="item.description">
+              <p>{{ item.title }}</p>
+            </router-link>
+          </ul>
+          <ul class="mark">
+            <li
+              v-for="(item, key) in mark" 
+              :key="key"
+              :style="{backgroundColor: item.color}">
+            </li>
+          </ul>
+        </nav>
+        <div
+          class="shopList">
+          <shop-list
+            :offset="offset"
+            :refreshContral="refreshContral"
+            @listenOffset="listenOffset"></shop-list>
         </div>
       </div>
-    </scroll>
-  </div>
+    </div>
+  </scroll>
 </template>
 
 <script>
@@ -120,13 +117,10 @@ export default {
       position1: 0,
       position2: '100%',
       trans: '',
-      clientHeight: '',
       listenScroll: true,
       refreshContral: true,
       offsetLimit: true,
-      data: {
-        offset: 0
-      },
+      offset: 0,
       footerHeight: ''
     }
   },
@@ -163,8 +157,8 @@ export default {
       return mark
     },
 
-    heightWrap1 () {
-      return `${this.clientHeight - this.btmNavH}px`
+    watcherData () {
+      return [this.offset]
     },
 
     ...mapState([
@@ -189,7 +183,6 @@ export default {
     this.addressGet(this.geohashGet)
     // this.weatherGet(this.geohashGet) // 获取天气（暂时没法用）
     this.msiteFoodTypesGet(this.geohashGet)
-    this.clientHeightGet()
   },
 
   methods: {
@@ -306,11 +299,6 @@ export default {
       this.visible = false
     },
 
-    clientHeightGet () { // 获取屏幕高度
-      this.clientHeight = document.documentElement.clientHeight
-      this.clientHeightSave(this.clientHeight)
-    },
-
     keepSearchBox (val) {
       if (val.y <= -40) {
         this.$refs.search.style.transform = `translateY(${-(val.y + 40)}px)`
@@ -321,12 +309,12 @@ export default {
 
     pullup () {
       if (this.offsetLimit) {
-        this.data.offset += 20
+        this.offset += 20
       }
     },
 
     pulldown () {
-      this.data.offset = 0
+      this.offset = 0
       this.refreshContral = !this.refreshContral
     },
 
@@ -337,8 +325,7 @@ export default {
     ...mapMutations([
       'geoSave',
       'geohashSave',
-      'cityNameSave',
-      'clientHeightSave'
+      'cityNameSave'
     ]),
 
     ...mapActions([
@@ -441,6 +428,7 @@ export default {
     }
   }
   .wrap1 {
+    height: 100%;
     overflow-y: hidden;
   }
 </style>

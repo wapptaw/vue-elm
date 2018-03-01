@@ -44,7 +44,7 @@
         type: Boolean,
         default: false
       },
-      data: {
+      watcherData: {
         type: Array,
         default () {
           return []
@@ -55,6 +55,14 @@
     data () {
       return {
         scroll: ''
+      }
+    },
+
+    watch: {
+      watcherData (v) {
+        setTimeout(() => {
+          this.refresh()
+        }, this.refreshDelay)
       }
     },
 
@@ -106,14 +114,6 @@
 
       refresh () {
         this.scroll && this.scroll.refresh()
-      }
-    },
-
-    watch: {
-      data () {
-        setTimeout(() => {
-          this.refresh()
-        }, this.refreshDelay)
       }
     }
   }

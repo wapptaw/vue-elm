@@ -1,7 +1,8 @@
 <template>
 <scroll
-  :style="{height: evaHeight, overflowY: 'auto'}"
+  :style="{height: evaHeight, overflowY: 'hidden'}"
   :pullUpLoad="true"
+  :watcherData="watcherData"
   @pullingUp="ratingLoad">
   <div>
     <section class="ratingScores">
@@ -44,7 +45,7 @@
     </section>
     <section class="ratingList">
       <ul class="ulRatingList">
-        <li v-for="item in getRatingListData" :key="item._id" class="itemRating">
+        <li v-for="(item, index) in getRatingListData" :key="index" class="itemRating">
           <img v-if="item.avatar" :src="`${imgBaseUrl}${item.avatar}.jpeg`" alt="">
           <img v-else :src="userAvatarDefault" alt="">
           <section class="ratingContent">
@@ -118,14 +119,17 @@ export default {
       imgBaseUrl,
       userAvatarDefault,
       tagSelectedMark: 0,
-      arriveBtm: false,
-      data: [this.offset]
+      arriveBtm: false
     }
   },
 
   computed: {
     evaHeight () {
       return this.clientHeight - this.detailsHeight + 'px'
+    },
+
+    watcherData () {
+      return [this.offset]
     },
 
     ...mapState([

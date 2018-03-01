@@ -7,8 +7,6 @@
 </template>
 
 <script>
-import {mapMutations} from 'vuex'
-
 export default { // 返回栏
   name: 'TopBack',
 
@@ -32,17 +30,13 @@ export default { // 返回栏
   },
 
   mounted () {
-    this.backHeightSave(this.backHeightVal)
+    this.$emit('heightGet', this.backHeightVal)
   },
 
   methods: {
     goBack () {
       this.$router.go(-1)
-    },
-
-    ...mapMutations([
-      'backHeightSave'
-    ])
+    }
   }
 }
 </script>

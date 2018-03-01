@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="shopSafe">
-      <TopBack title="食品监督安全公示"></TopBack>
+      <TopBack title="食品监督安全公示" @heightGet="topBackHeightGet"></TopBack>
       <div :style="{height: shopSafeHeight, overflowY: 'auto'}">
       <section class="result">
         <h2>食品监督安全公示</h2>
@@ -56,16 +56,27 @@ export default {
     TopBack: async () => import('../../../../components/common/TopBack')
   },
 
+  data () {
+    return {
+      topBackH: 0
+    }
+  },
+
   computed: {
     shopSafeHeight () {
-      return this.clientHeight - this.backHeight + 'px'
+      return this.clientHeight - this.topBackH + 'px'
     },
 
     ...mapState([
       'shopDetailsData',
-      'clientHeight',
-      'backHeight'
+      'clientHeight'
     ])
+  },
+
+  methods: {
+    topBackHeightGet (H) {
+      this.topBackH = H
+    }
   }
 }
 </script>

@@ -14,13 +14,11 @@ const state = {
   cityId: '', // 城市id
   cityGroup: '', // 所有城市
   clientHeight: '', // 屏幕高度
-  backHeight: '',
   historyList: [], // 搜索记录
   cityGroupData: {}, // 城市列表
   detailsHeight: '', // foodPage页面header高度
   shopDetailsData: '',
-  foodMenu: {}, // order页数据
-  btmNavH: 0 // BottomNav页面高度
+  foodMenu: {} // order页数据
 }
 
 export default new Vuex.Store({

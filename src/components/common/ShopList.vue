@@ -4,7 +4,6 @@
       <router-link
         tag="li"
         :to="{name: 'order', params: {id: item.id}}"
-        
         v-for="(item, index) in listDate"
         :key="item.id"
         class="list">
