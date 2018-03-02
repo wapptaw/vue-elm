@@ -2,10 +2,7 @@ export default {
   geoSave (state, geo) { // 存储经度和纬度
     state.latitude = geo.latitude
     state.longitude = geo.longitude
-  },
-
-  geohashSave (state, geohash) { // 存储geohash
-    state.geohash = geohash
+    state.locateFailure = geo.locateFailure
   },
 
   cityNameSave (state, cityName) { // 存储城市名称

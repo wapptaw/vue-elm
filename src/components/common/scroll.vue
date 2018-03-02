@@ -13,26 +13,38 @@
     props: {
       click: { // 是否响应点击事件
         type: Boolean,
-        default: true
+        default: false
       },
       useTransition: {
         type: Boolean,
-        default: true //
+        default: true
       },
       probeType: {
         type: Number,
         default: 0
       },
-      pullUpLoad: {
+      pullUpLoad: { // 上拉加载功能
         type: [Boolean, Object],
-        default: false
+        default () {
+          return false
+        }
+      },
+      pullDownRefresh: { // 下拉刷新功能
+        type: [Boolean, Object],
+        default () {
+          return false
+        }
       },
 
-      pullup: { // 是否可上拉
+      scrollListen: { // 监听滚动
         type: Boolean,
         default: false
       },
-      pulldown: { // 是否可下拉
+      scrollEnd: { // 滚动结束
+        type: Boolean,
+        default: false
+      },
+      touchEnd: { // 手指离开
         type: Boolean,
         default: false
       },
@@ -40,11 +52,7 @@
         type: Number,
         default: 20
       },
-      scrollListen: {
-        type: Boolean,
-        default: false
-      },
-      watcherData: {
+      watcherData: { // 所监听的数据变化
         type: Array,
         default () {
           return []
@@ -80,34 +88,37 @@
           click: this.click,
           useTransition: this.useTransition,
           probeType: this.probeType,
-          pullUpLoad: this.pullUpLoad
+          pullUpLoad: this.pullUpLoad,
+          pullDownRefresh: this.pullDownRefresh
         })
 
-        if (this.pullup) { // 上拉，手指离开屏幕后
-          this.scroll.on('scrollEnd', () => {
-            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
-              this.$emit('scrollToEnd')
-            }
+        if (this.scrollListen) { // 页面滚动事件
+          this.scroll.on('scroll', () => {
+            this.$emit('scroll', this.scroll)
           })
         }
 
-        if (this.pulldown) { // 下拉，手指离开屏幕后
+        if (this.scrollEnd) { // 滚动结束
+          this.scroll.on('scrollEnd', pos => {
+            this.$emit('scrollEnd', pos)
+          })
+        }
+
+        if (this.touchEnd) { // 鼠标/手指离开
           this.scroll.on('touchEnd', pos => {
-            if (pos.y > 50) {
-              this.$emit('pulldown')
-            }
+            this.$emit('touchEnd', pos)
           })
         }
 
-        if (this.scrollListen) {
-          this.scroll.on('scroll', val => {
-            this.$emit('scroll', val)
-          })
-        }
-
-        if (this.pullUpLoad) { // 上拉
+        if (this.pullUpLoad) { // 上拉加载，需要开启上拉加载功能和在加载完成后运行finishPullUp()方法告诉BS数据加载完成
           this.scroll.on('pullingUp', () => {
             this.$emit('pullingUp', this.scroll)
+          })
+        }
+
+        if (this.pullDownRefresh) { // 下拉刷新，需要开启下拉刷新功能和在加载完成后运行finishPullDown()方法告诉BS刷新完成
+          this.scroll.on('pullingDown', () => {
+            this.$emit('pullingDown', this.scroll)
           })
         }
       },

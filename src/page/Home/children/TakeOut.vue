@@ -1,28 +1,31 @@
 <template>
   <scroll
-    :pullup="true"
-    :pulldown="true"
+    :click="true"
+    :pullUpLoad="true"
+    :pullDownRefresh="{threshold: 50, stop: 20}"
     :probeType="3"
     :useTransition="false"
     :scrollListen="true"
     :watcherData="watcherData"
     class="wrap1"
-    @scrollToEnd="pullup"
-    @pulldown="pulldown"
-    @scroll="keepSearchBox">
+    @pullingUp="pullUpLoad"
+    @pullingDown="pullDownRefresh"
+    @scroll="scrollChange">
     <div>
       <header class="header">
         <router-link to="AddressSearch" tag="div">
           <div class="geolocation">
-            <span v-if="loading">定位中...</span>
-            <span v-else-if="locationFailure">{{ failure }}</span>
-            <span v-else>{{ address }}</span>
+            <section v-if="locateFailure">
+              <span v-if="locateFailure.status">{{locateFailure.message}}</span>
+              <span v-else>{{ address }}</span>
+            </section>
+            <span v-else>定位中...</span>
           </div>
         </router-link>
-        <!-- <div class="weather">
+        <div class="weather">
           <span>{{ weather.cond_txt }}</span>
           <span>{{ weather.temp }}</span>
-        </div> // 和风天气貌似不同源不能用，天气功能暂时挂掉 -->
+        </div>
       </header>
       <div
         ref="search"
@@ -76,19 +79,21 @@
         </nav>
         <div
           class="shopList">
-          <shop-list
-            :offset="offset"
-            :refreshContral="refreshContral"
-            @listenOffset="listenOffset"></shop-list>
+          <shop-list :shopListData="shopListData"></shop-list>
         </div>
       </div>
+    </div>
+    <div
+      :style="{height: noneAniHeight}"
+      class="noneAni">
+      <span>没有了</span>
     </div>
   </scroll>
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
-import { getAddress, getWeather, msiteFoodTypes } from '../../../service/getData'
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex'
+import { getAddress, getWeather, msiteFoodTypes, shopList } from '../../../service/getData'
 import { imgBaseUrl } from '../../../config/url'
 
 export default {
@@ -101,10 +106,7 @@ export default {
 
   data () {
     return {
-      failure: '',
       address: '',
-      locationFailure: false,
-      loading: true,
       weather: {
         cond_txt: '',
         temp: ''
@@ -117,25 +119,15 @@ export default {
       position1: 0,
       position2: '100%',
       trans: '',
-      listenScroll: true,
-      refreshContral: true,
-      offsetLimit: true,
+      shopListData: [],
       offset: 0,
+      shopListLimit: false,
+      noneAniHeight: 0,
       footerHeight: ''
     }
   },
 
   computed: {
-    geohashGet () {
-      if (this.geohash) {
-        return this.geohash
-      } else if (this.latitude && this.longitude) {
-        return `${this.latitude},${this.longitude}`
-      } else {
-        return ''
-      }
-    },
-
     msite1 () {
       return this.msite.slice(this.index * 8, this.index * 8 + 8)
     },
@@ -158,108 +150,68 @@ export default {
     },
 
     watcherData () {
-      return [this.offset]
+      return [this.shopListData]
     },
 
     ...mapState([
       'latitude',
       'longitude',
-      'geohash',
-      'btmNavH'
+      'locateFailure'
+    ]),
+    ...mapGetters([
+      'geohash'
     ])
   },
-
   watch: {
-    geohashGet (val) {
-      this.addressGet(val)
-      this.weatherGet(val)
-      this.geohashSave(val)
-      this.msiteFoodTypesGet(val)
+    geohash () {
+      this.addressGet()
+      this.weatherGet()
+      this.msiteFoodTypesGet()
+      this.shopListGet()
     }
   },
 
   mounted () {
-    this.getGeo()
-    this.addressGet(this.geohashGet)
-    // this.weatherGet(this.geohashGet) // 获取天气（暂时没法用）
-    this.msiteFoodTypesGet(this.geohashGet)
+    this.addressGet()
+    this.weatherGet()
+    this.msiteFoodTypesGet()
+    this.shopListGet()
   },
 
   methods: {
-    getGeo () { // h5定位
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(this.showPosition, this.showError)
-      } else {
-        this.failure = '浏览器不支持地理定位'
+    async addressGet () { // 地址获取
+      try {
+        if (this.geohash) {
+          let res = await getAddress(this.geohash)
+          this.address = res.result.formatted_address
+          this.cityNameSave(res.result.addressComponent.city + res.result.addressComponent.district)
+          this.cityIdSave()
+        }
+      } catch (e) {
+        throw new Error(e)
       }
     },
 
-    showPosition (position) { // 获取经纬度和地址
-      const latitude = position.coords.latitude
-      const longitude = position.coords.longitude
-      this.loading = false
-      this.locationFailure = false
-      if (this.latitude === '' || this.longitude === '') {
-        this.geoSave({
-          latitude,
-          longitude
-        })
+    async weatherGet () { // 天气获取
+      try {
+        if (this.geohash) {
+          let res = await getWeather(this.geohash)
+          this.weather.cond_txt = res.HeWeather6[0].now.cond_txt
+          this.weather.temp = res.HeWeather6[0].now.tmp
+        }
+      } catch (e) {
+        throw new Error(e)
       }
     },
 
-    showError (error) { // 定位失败处理
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          this.failure = '定位失败,用户拒绝请求地理定位'
-          this.loading = false
-          this.locationFailure = true
-          break
-        case error.POSITION_UNAVAILABLE:
-          this.failure = '定位失败,位置信息是不可用'
-          this.loading = false
-          this.locationFailure = true
-          break
-        case error.TIMEOUT:
-          this.failure = '定位失败,请求获取用户位置超时'
-          this.loading = false
-          this.locationFailure = true
-          break
-        case error.UNKNOWN_ERROR:
-          this.failure = '定位失败,定位系统失效'
-          this.loading = false
-          this.locationFailure = true
-          break
-      }
-    },
-
-    addressGet (geohash) { // 具体地址获取
-      if (geohash) {
-        getAddress(geohash).then(response => {
-          this.address = response.result.formatted_address
-          this.cityNameSave(response.result.addressComponent.city + response.result.addressComponent.district)
-          this.cityIdGet() // 保存cityId
-        }).catch(e => {
-          throw new Error(e)
-        })
-      }
-    },
-
-    weatherGet (geohash) { // 天气获取
-      if (geohash) {
-        getWeather(geohash).then(response => {
-          this.weather.cond_txt = response.HeWeather6[0].now.cond_txt
-          this.weather.temp = response.HeWeather6[0].now.tmp
-        }).catch(e => {
-          throw new Error(e)
-        })
-      }
-    },
-
-    msiteFoodTypesGet (geohash) {  // 食物分类列表
-      if (geohash) {
-        msiteFoodTypes(geohash).then(response => {
-          this.msite = response
-        })
+    async msiteFoodTypesGet () { // 食物分类列表
+      try {
+        if (this.geohash) {
+          let res = await msiteFoodTypes(this.geohash)
+          this.msite = res
+        }
+      } catch (e) {
+        throw new Error(e)
       }
     },
 
@@ -299,37 +251,54 @@ export default {
       this.visible = false
     },
 
-    keepSearchBox (val) {
-      if (val.y <= -40) {
-        this.$refs.search.style.transform = `translateY(${-(val.y + 40)}px)`
+    scrollChange (scroll) {
+      if (scroll.y <= -40) {
+        this.$refs.search.style.transform = `translateY(${-(scroll.y + 40)}px)`
       } else {
         this.$refs.search.style.transform = 'translateY(0)'
       }
-    },
-
-    pullup () {
-      if (this.offsetLimit) {
-        this.offset += 20
+      if (this.shopListLimit) {
+        if (scroll.maxScrollY - scroll.y > 0) {
+          this.noneAniHeight = `${scroll.maxScrollY - scroll.y}px`
+        } else {
+          this.noneAniHeight = 0
+        }
       }
     },
 
-    pulldown () {
-      this.offset = 0
-      this.refreshContral = !this.refreshContral
+    async shopListGet () { // shopList数据获取
+      try {
+        if (this.geohash) {
+          let res = await shopList(this.latitude, this.longitude, this.offset)
+          this.shopListLimit = res.length < 20
+          this.shopListData = this.shopListData.concat(res)
+        }
+      } catch (e) {
+        throw new Error(e)
+      }
     },
 
-    listenOffset (offsetLimit) {
-      this.offsetLimit = offsetLimit
+    async pullDownRefresh (scroll) {
+      this.shopListData = []
+      this.offset = 0
+      await this.shopListGet()
+      scroll.finishPullDown()
+    },
+
+    async pullUpLoad (scroll) {
+      if (!this.shopListLimit) {
+        this.offset += 20
+        await this.shopListGet()
+        scroll.finishPullUp()
+      }
     },
 
     ...mapMutations([
-      'geoSave',
-      'geohashSave',
       'cityNameSave'
     ]),
 
     ...mapActions([
-      'cityIdGet'
+      'cityIdSave'
     ])
   }
 }
@@ -430,5 +399,19 @@ export default {
   .wrap1 {
     height: 100%;
     overflow-y: hidden;
+    position: relative;
+  }
+  .noneAni {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    span {
+      color: #616161;
+    }
   }
 </style>

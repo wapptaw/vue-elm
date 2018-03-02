@@ -1,7 +1,7 @@
 import { cityGroup } from '../service/getData'
 
 export default {
-  async cityIdGet ({state}) { // 获取城市id
+  async cityIdSave ({state}) { // 获取城市id
     try {
       let res = await cityGroup()
       state.cityGroup = res

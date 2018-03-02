@@ -9,7 +9,7 @@ Vue.use(Vuex)
 const state = {
   latitude: '', // 当前纬度
   longitude: '', // 当前经度
-  geohash: '',
+  locateFailure: '', // 定位失败信息
   cityName: '', // 城市名
   cityId: '', // 城市id
   cityGroup: '', // 所有城市
