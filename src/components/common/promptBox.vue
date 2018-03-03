@@ -1,6 +1,6 @@
 <template>
   <div
-    :style="{height: boxHeight, top: boxTop, bottom: boxBottom}"
+    :style="boxStyle"
     class="prompBox">
     <slot></slot>
   </div>
@@ -11,17 +11,15 @@ export default {
   name: 'promptBox',
 
   props: {
-    boxHeight: {
-      type: [String, Number],
-      default: 0
-    },
-    boxTop: {
-      type: [String, Number],
-      default: 'auto'
-    },
-    boxBottom: {
-      type: [String, Number],
-      default: 'auto'
+    boxStyle: {
+      type: Object,
+      default () {
+        return {
+          height: 0,
+          top: 'auto',
+          bottom: 'auto'
+        }
+      }
     }
   }
 }

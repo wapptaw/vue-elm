@@ -83,11 +83,9 @@
         </div>
       </div>
     </div>
-    <div
-      :style="{height: noneAniHeight}"
-      class="noneAni">
-      <span>没有了</span>
-    </div>
+    <promptBox :boxStyle="loadStyle">
+      <span>{{loadContent}}</span>
+    </promptBox>
   </scroll>
 </template>
 
@@ -101,7 +99,8 @@ export default {
 
   components: {
     ShopList: async () => import('../../../components/common/ShopList'), // 异步加载组件
-    scroll: async () => import('../../../components/common/scroll')
+    scroll: async () => import('../../../components/common/scroll'),
+    promptBox: async () => import('../../../components/common/promptBox')
   },
 
   data () {
@@ -122,7 +121,12 @@ export default {
       shopListData: [],
       offset: 0,
       shopListLimit: false,
-      noneAniHeight: 0,
+      loadContent: '加载中...',
+      loadStyle: {
+        height: 0,
+        bottom: 'auto',
+        top: 'auto'
+      },
       footerHeight: ''
     }
   },
@@ -251,7 +255,7 @@ export default {
       this.visible = false
     },
 
-    scrollChange (scroll) {
+    scrollChange (scroll) { // scroll事件
       if (scroll.y <= -40) {
         this.$refs.search.style.transform = `translateY(${-(scroll.y + 40)}px)`
       } else {
@@ -259,10 +263,25 @@ export default {
       }
       if (this.shopListLimit) {
         if (scroll.maxScrollY - scroll.y > 0) {
-          this.noneAniHeight = `${scroll.maxScrollY - scroll.y}px`
+          this.loadStyle = {
+            bottom: 0,
+            top: 'auto',
+            height: `${scroll.maxScrollY - scroll.y}px`
+          }
+          this.loadContent = '加载中'
         } else {
-          this.noneAniHeight = 0
+          this.loadStyle.height = 0
         }
+      }
+      if (scroll.y > 0) {
+        this.loadStyle = {
+          bottom: 'auto',
+          top: 0,
+          height: `${scroll.y}px`
+        }
+        this.loadContent = '正在刷新...'
+      } else if (scroll.maxScrollY - scroll.y < 0) {
+        this.loadStyle.height = 0
       }
     },
 
@@ -400,18 +419,5 @@ export default {
     height: 100%;
     overflow-y: hidden;
     position: relative;
-  }
-  .noneAni {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    span {
-      color: #616161;
-    }
   }
 </style>
