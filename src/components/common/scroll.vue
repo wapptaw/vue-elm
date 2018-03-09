@@ -35,6 +35,10 @@
           return false
         }
       },
+      bounce: { // 回弹动画
+        type: Boolean,
+        default: true
+      },
 
       scrollListen: { // 监听滚动
         type: Boolean,
@@ -50,7 +54,7 @@
       },
       refreshDelay: { // 刷新延时
         type: Number,
-        default: 20
+        default: 0
       },
       watcherData: { // 所监听的数据变化
         type: Array,
@@ -89,7 +93,8 @@
           useTransition: this.useTransition,
           probeType: this.probeType,
           pullUpLoad: this.pullUpLoad,
-          pullDownRefresh: this.pullDownRefresh
+          pullDownRefresh: this.pullDownRefresh,
+          bounce: this.bounce
         })
 
         if (this.scrollListen) { // 页面滚动事件

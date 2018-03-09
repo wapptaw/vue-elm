@@ -69,7 +69,7 @@ export const searchRestaurant = (geohash, keyword) => fetch(`${baseUrl}/v4/resta
 export const foodCategory = (latitude, longitude) => fetch(`${baseUrl}/shopping/v2/restaurant/category`, {
   latitude,
   longitude
-})
+}) // food筛选
 
 export const shopDetails = (shopId, latitude, longitude) => fetch(`${baseUrl}/shopping/restaurant/${shopId}?extras[]=activities&extras[]=album&extras[]=license&extras[]=identification&extras[]=statistics`, {
   latitude,
@@ -90,3 +90,15 @@ export const getRatingList = (shopId, offset, tagName = '') => fetch(`${baseUrl}
 export const ratingScores = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/scores`) // 评价分数
 
 export const ratingTags = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/tags`) // 评价分类
+
+export const foodDelivery = (latitude, longitude) => fetch(`${baseUrl}/shopping/v1/restaurants/delivery_modes`, {
+  latitude,
+  longitude,
+  kw: ''
+}) // 配送方式
+
+export const foodActivity = (latitude, longitude) => fetch(`${baseUrl}/shopping/v1/restaurants/activity_attributes`, {
+  latitude,
+  longitude,
+  kw: ''
+}) // 商家属性活动列表

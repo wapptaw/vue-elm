@@ -30,7 +30,7 @@ export default { // 返回栏
   },
 
   mounted () {
-    this.$emit('heightGet', this.backHeightVal)
+    this.$emit('heightGet', 40)
   },
 
   methods: {

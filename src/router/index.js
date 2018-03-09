@@ -58,13 +58,8 @@ export default new Router({
       name: 'citySelect',
       component: CitySelect
     },
-    // {
-    //   path: '/ShopSearch',
-    //   name: 'shopSearch',
-    //   component: ShopSearch
-    // },
     {
-      path: '/FoodCategory/:category',
+      path: '/FoodCategory',
       name: 'foodCategory',
       component: FoodCategory
     },

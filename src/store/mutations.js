@@ -9,6 +9,14 @@ export default {
     state.cityName = cityName
   },
 
+  shopListDataSave (state, shopListData) { // 存储takeout页列表数据
+    state.shopListDataNative = shopListData
+  },
+
+  msiteSave (state, msiteData) { // msite数据
+    state.msiteData = msiteData
+  },
+
   clientHeightSave (state, clientHeight) { // 存储屏幕高度
     state.clientHeight = clientHeight
   },
@@ -35,5 +43,9 @@ export default {
 
   foodMenuDataSave (state, foodMenuData) { // 存储foodMenuData
     state.foodMenu[foodMenuData.shopId] = foodMenuData.foodMenuData
+  },
+
+  shopSearchSave (state, shopSearch) {
+    state.shopSearch = shopSearch
   }
 }

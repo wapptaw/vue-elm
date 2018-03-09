@@ -11,6 +11,8 @@ const state = {
   longitude: '', // 当前经度
   locateFailure: '', // 定位失败信息
   cityName: '', // 城市名
+  shopListDataNative: [],
+  msiteData: '',
   cityId: '', // 城市id
   cityGroup: '', // 所有城市
   clientHeight: '', // 屏幕高度
@@ -18,7 +20,11 @@ const state = {
   cityGroupData: {}, // 城市列表
   detailsHeight: '', // foodPage页面header高度
   shopDetailsData: '',
-  foodMenu: {} // order页数据
+  foodMenu: {}, // order页数据
+  shopSearch: {
+    searchData: [],
+    searchHistory: []
+  }
 }
 
 export default new Vuex.Store({

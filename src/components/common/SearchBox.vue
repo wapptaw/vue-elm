@@ -30,6 +30,10 @@ export default {
     }
   },
 
+  mounted () {
+    this.heightGet()
+  },
+
   methods: {
     search () {
       if (this.inputVal) {
@@ -41,6 +45,10 @@ export default {
       if (this.inputEventAble) {
         this.$emit('changeVal', this.inputVal)
       }
+    },
+
+    heightGet () {
+      this.$emit('heightGet', 60)
     }
   }
 }
@@ -51,9 +59,7 @@ export default {
     width: 100%;
     font-size: 0;
     box-sizing: border-box;
-    padding: 0 .05rem;
-    padding-bottom: .1rem;
-    margin-top: .05rem;
+    padding: .1rem .05rem;
     display: flex;
     justify-content: space-between;
     .searchVal, .searchBox {

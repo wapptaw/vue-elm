@@ -3,7 +3,7 @@
     <header class="details" :style="detailsStyle">
       <img :src="`${this.imgBaseUrl2}${this.shopDetailsData && this.shopDetailsData.image_path}`" class="headerBg">
       <div class="headerContent" ref="headerContent">
-        <router-link tag="span" :to="{name: 'takeOut'}" class="back">返回</router-link>
+        <v-touch tag="span" class="back" @tap="goBack">返回</v-touch>
         <div class="icon">
           <img :src="`${imgBaseUrl2}${shopDetailsData.image_path}`" alt="">
         </div>
@@ -31,17 +31,17 @@
         <router-link
           tag="li"
           :to="{name: item.className}"
-          v-for="(item, index) of titles"
+          v-for="item of titles"
           :key="item.className"
           :class="item.className">
-          <v-touch tag="div" class="titleBox" @tap="selected(index)">
-            <span :class="item.selected">{{item.title}}</span>
-          </v-touch>
+          <span :class="{selected: item.selected}">{{item.title}}</span>
         </router-link>
       </ul>
       <router-view></router-view>
     </div>
-    <v-touch tag="div" class="fullScreen" v-if="actives" @tap="activeClose"></v-touch>
+    <transition name="fullScreenFade">
+      <v-touch tag="div" class="fullScreen" v-if="actives" @tap="activeClose"></v-touch>
+    </transition>
     <transition name="slide">
       <div class="activesAll" v-if="actives">
         <h2 class="title">优惠活动</h2>
@@ -88,11 +88,10 @@ export default {
       detailsHeight: '',
       actives: false,
       titles: [
-        {title: '点餐', className: 'order', selected: {selected: true}},
-        {title: '评价', className: 'evaluate', selected: {selected: false}},
-        {title: '商家', className: 'merchant', selected: {selected: false}}
-      ],
-      selectedNum: 0
+        {title: '点餐', className: 'order', selected: true},
+        {title: '评价', className: 'evaluate', selected: false},
+        {title: '商家', className: 'merchant', selected: false}
+      ]
     }
   },
 
@@ -120,6 +119,17 @@ export default {
     this.shopDetailsDataGet()
   },
 
+  beforeRouteUpdate (to, from, next) {
+    for (let v of this.titles) {
+      if (to.name === v.className) {
+        v.selected = true
+      } else {
+        v.selected = false
+      }
+    }
+    next()
+  },
+
   methods: {
     async shopDetailsDataGet () { // 获取商铺信息
       let res = await shopDetails(this.id, this.latitude, this.longitude)
@@ -139,10 +149,8 @@ export default {
       this.actives = false
     },
 
-    selected (index) {
-      this.titles[this.selectedNum].selected.selected = false
-      this.titles[index].selected.selected = true
-      this.selectedNum = index
+    goBack () {
+      this.$router.go(-1)
     },
 
     ...mapMutations([
@@ -172,6 +180,15 @@ export default {
     .activesNum {
       color: #56abfa;
     }
+  }
+  .fullScreenFade-enter, .fullScreenFade-leave-to {
+    opacity: 0;
+  }
+  .fullScreenFade-enter-active, .fullScreenFade-leave-active {
+    transition: opacity .2s ease-out;
+  }
+  .fullScreenFade-leave, .fullScreenFade-enter-to {
+    opacity: 1;
   }
 
   .details {
@@ -233,21 +250,16 @@ export default {
   .shopContent {
     .title {
       display: flex;
-      justify-content: space-between;
       margin-top: 1px;
       border-bottom: 1px solid #cecece;
       li {
-        flex: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: .3rem;
         font-size: .16rem;
         color: #181818;
-        .titleBox {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
+        flex: auto;
       }
       .selected {
         position: relative;

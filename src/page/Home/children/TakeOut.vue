@@ -13,7 +13,7 @@
     @scroll="scrollChange">
     <div>
       <header class="header">
-        <router-link to="AddressSearch" tag="div">
+        <router-link to="AddressSearch" tag="div" event="touchend">
           <div class="geolocation">
             <section v-if="locateFailure">
               <span v-if="locateFailure.status">{{locateFailure.message}}</span>
@@ -46,7 +46,7 @@
               @transitionend = "transEnd1"
               class="foodNav">
               <router-link
-                :to="{path: `/FoodCategory/${item.title}`, query: {restaurantCategoryId: item.id, restaurantCategoryTitle: item.title}}" 
+                :to="{name: 'foodCategory', query: {restaurantCategoryId: restaurantCategoryIdGet(item.link), restaurantCategoryTitle: item.title}}" 
                 tag="li"
                 v-for="item in msite1"
                 :key="item.id">
@@ -160,7 +160,9 @@ export default {
     ...mapState([
       'latitude',
       'longitude',
-      'locateFailure'
+      'locateFailure',
+      'shopListDataNative',
+      'msiteData'
     ]),
     ...mapGetters([
       'geohash'
@@ -179,7 +181,7 @@ export default {
     this.addressGet()
     this.weatherGet()
     this.msiteFoodTypesGet()
-    this.shopListGet()
+    this.shopListMountedGet()
   },
 
   methods: {
@@ -210,12 +212,26 @@ export default {
 
     async msiteFoodTypesGet () { // 食物分类列表
       try {
-        if (this.geohash) {
-          let res = await msiteFoodTypes(this.geohash)
-          this.msite = res
+        if (this.msiteData) {
+          this.msite = this.msiteData
+        } else {
+          if (this.geohash) {
+            let res = await msiteFoodTypes(this.geohash)
+            this.msite = res
+            this.msiteSave(this.msite)
+          }
         }
       } catch (e) {
         throw new Error(e)
+      }
+    },
+
+    restaurantCategoryIdGet (URL) { // 转码
+      let urlData = decodeURIComponent(URL.split('=')[1].replace('&target_name', ''))
+      if (/restaurant_category_id/gi.test(urlData)) {
+        return JSON.parse(urlData).restaurant_category_id.id
+      } else {
+        return ''
       }
     },
 
@@ -291,29 +307,48 @@ export default {
           let res = await shopList(this.latitude, this.longitude, this.offset)
           this.shopListLimit = res.length < 20
           this.shopListData = this.shopListData.concat(res)
+          this.shopListDataSave(this.shopListData)
         }
       } catch (e) {
         throw new Error(e)
       }
     },
 
+    shopListMountedGet () { // 获取保存的数据
+      if (this.shopListDataNative.length > 0) {
+        this.shopListData = this.shopListDataNative
+      } else {
+        this.shopListGet()
+      }
+    },
+
     async pullDownRefresh (scroll) {
-      this.shopListData = []
-      this.offset = 0
-      await this.shopListGet()
-      scroll.finishPullDown()
+      try {
+        this.shopListData = []
+        this.offset = 0
+        await this.shopListGet()
+        scroll.finishPullDown()
+      } catch (e) {
+        throw new Error(e)
+      }
     },
 
     async pullUpLoad (scroll) {
-      if (!this.shopListLimit) {
-        this.offset += 20
-        await this.shopListGet()
+      try {
+        if (!this.shopListLimit) {
+          this.offset += 20
+          await this.shopListGet()
+        }
         scroll.finishPullUp()
+      } catch (e) {
+        throw new Error(e)
       }
     },
 
     ...mapMutations([
-      'cityNameSave'
+      'cityNameSave',
+      'shopListDataSave',
+      'msiteSave'
     ]),
 
     ...mapActions([

@@ -48,12 +48,15 @@
             </div>
           </v-touch>
         </dl>
-        <v-touch
-          tag="div"
-          class="fullScreen"
-          v-if="shadowShow"
-          @tap="shadowClose"
-          :style="{zIndex: tier}"></v-touch>
+        <transition name="fullScreenFade">
+          <v-touch
+            tag="div"
+            class="fullScreen"
+            v-if="shadowShow"
+            @tap="shadowClose"
+            :style="{zIndex: tier}">
+          </v-touch>
+        </transition>
         <section v-if="specShow" class="specSelect">
           <h3 class="specTitle">规格</h3>
           <ul class="specs">
@@ -385,6 +388,16 @@ export default {
     color: #e9451b;
     font-weight: bold;
   }
+  .fullScreenFade-enter, .fullScreenFade-leave-to {
+    opacity: 0;
+  }
+  .fullScreenFade-enter-active, .fullScreenFade-leave-active {
+    transition: opacity .2s ease-out;
+  }
+  .fullScreenFade-leave, .fullScreenFade-enter-to {
+    opacity: 1;
+  }
+  
   .fullScreen {
     width: 100%;
     height: 100%;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <section :style="{height: homeMainH, overflowY: 'hidden'}" class="homeMain">
-      <router-view></router-view>
+      <router-view :btmNavH="btmNavH"></router-view>
     </section>
     <BottomNav @heightGet="btmNavHGet"></BottomNav>
   </div>
@@ -79,10 +79,6 @@ export default {
     async coordsGet () {
       try {
         if (this.geohash && this.locateFailure) return // 如果已经保存了定位信息，就直接返回
-        this.geoSave({ // 定位期间使用默认经纬度
-          longitude: this.longitude,
-          latitude: this.latitude
-        })
         let position = await this.geolocation() // 定位中
         if (this.locateFailureMess.status === false) {
           this.longitude = position.longitude

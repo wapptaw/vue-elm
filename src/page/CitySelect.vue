@@ -107,7 +107,7 @@ export default {
     async pageLoad () { // 推迟所有城市列表加载
       try {
         await this.hotCityGet()
-        this.groupCityGet()
+        await this.groupCityGet()
       } catch (e) {
         throw new Error(e)
       }
@@ -188,13 +188,17 @@ export default {
     },
 
     changeCity (item) {
-      let geohash = item.latitude + ',' + item.longitude
-      this.geohashSave(geohash)
-      this.geoSave({latitude: item.latitude, longitude: item.longitude})
+      this.geoSave({
+        latitude: item.latitude,
+        longitude: item.longitude,
+        locateFailure: {
+          status: false,
+          message: '已手动选择地址'
+        }
+      })
     },
 
     ...mapMutations([
-      'geohashSave',
       'cityGroupDataSave',
       'geoSave'
     ])

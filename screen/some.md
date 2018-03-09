@@ -86,3 +86,6 @@
         1. touchEnd只要手指离开就能触发而scrollEnd必须滚动屏幕后手指离开触发
         2. 当有滚动动画时，scrollEnd需要在滚动动画结束后触发，而touchEnd在手指离开后立即出发，无论是否有滚动动画
         3. 当有回弹动画时，scrollEnd需要在回弹动画结束后触发，而touchEnd不需要
+18. vue组件的渲染完成的时机（使用ref获取组件计算高度时容易获取不到或则高度计算不准确，怀疑是组件渲染未完成，使用nextTick也不行啊)
+    1. 当vue组件采取异步加载时无法通过ref获取组件属性，当采取同步加载时可以获取组件Vue属性,可以读取属性值，例如：this.$refs.test.$el.offsetHeight可以读取ref为test的组件的offsetHeight值
+    2. 当组件内有通过异步获取的数据时，需要在数据加载完成后再获取css属性值

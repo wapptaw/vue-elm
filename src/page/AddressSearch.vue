@@ -32,7 +32,7 @@
       <div class="placeList" else>
         <ul>
           <router-link
-            to="/"
+            :to="{name: 'takeOut'}"
             event="click"
             tag="li"
             v-for="item in placeList"
@@ -115,14 +115,26 @@ export default {
     },
 
     changeGeohash (item) {
-      this.geohashSave(item.geohash)
       this.historyListSave(item)
-      this.geoSave({latitude: item.latitude, longitude: item.longitude})
+      this.geoSave({
+        latitude: item.latitude,
+        longitude: item.longitude,
+        locateFailure: {
+          status: false,
+          message: '已手动选择地址'
+        }
+      })
     },
 
     lookHistory (item) {
-      this.geohashSave(item.geohash)
-      this.geoSave({latitude: item.latitude, longitude: item.longitude})
+      this.geoSave({
+        latitude: item.latitude,
+        longitude: item.longitude,
+        locateFailure: {
+          status: false,
+          message: '已手动选择地址'
+        }
+      })
     },
 
     removeHistory () {
@@ -130,7 +142,6 @@ export default {
     },
 
     ...mapMutations([
-      'geohashSave',
       'historyListSave',
       'historyListRemove',
       'geoSave'
