@@ -50,9 +50,9 @@
 </template>
 
 <script>
-import TopBack from '../components/common/TopBack'
-import SearchBox from '../components/common/SearchBox'
-import { searchPlace } from '../service/getData'
+import TopBack from '../../components/common/TopBack'
+import SearchBox from '../../components/common/SearchBox'
+import { searchPlace } from '../../service/getData'
 import { mapState, mapMutations } from 'vuex'
 
 export default {

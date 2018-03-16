@@ -24,7 +24,8 @@ const state = {
   shopSearch: {
     searchData: [],
     searchHistory: []
-  }
+  },
+  orderForms: []
 }
 
 export default new Vuex.Store({

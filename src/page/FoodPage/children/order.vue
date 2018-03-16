@@ -106,7 +106,13 @@
     <footer class="cartView" ref="cartView">
       <v-touch tag="span" class="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
       <span class="totalPrices">￥{{sum.totalPrices}}</span>
-      <span class="pay">付款</span>
+      <router-link
+        :to="{name: 'orderConfirm'}"
+        tag="span"
+        event="touchend"
+        class="pay">
+        付款
+      </router-link>
     </footer>
   </div>
 </template>
@@ -225,6 +231,9 @@ export default {
     this.foodMenuDataSave({
       foodMenuData: this.foodMenuData,
       shopId: this.id})
+    if (to.name === 'orderConfirm') {
+      // 需要验证用户所以user页面写完再说
+    }
     next()
   },
 

@@ -1,27 +1,26 @@
 import fetch from '../config/fetch'
-import { baseUrl } from '../config/url'
 
-export const getAddress = (geo) => fetch('http://api.map.baidu.com/geocoder/v2/', {
+export const getAddress = (geo) => fetch('/geocoder/v2/', {
   location: geo,
   output: 'json',
   pois: 1,
   ak: 'YIxfqG9DZg5nlQqbMS5q7PuSom5wr4CK'
-}, 'JSONP') // 根据经纬度获取具体位置
+}, {}, 'JSONP', 'http://api.map.baidu.com') // 根据经纬度获取具体位置
 
-export const getWeather = (geo) => fetch('https://free-api.heweather.com/s6/weather/now', {
+export const getWeather = (geo) => fetch('/s6/weather/now', {
   key: '1cf2771a43d741a7af250f78bafb0c90',
   location: geo
-})  // 获取天气情况
+}, {}, 'GET', 'https://free-api.heweather.com')  // 获取天气情况
 
-export const cityHot = () => fetch(`${baseUrl}/v1/cities`, {
+export const cityHot = () => fetch('/v1/cities', {
   type: 'hot'
 }) // 热门城市
 
-export const cityGroup = () => fetch(`${baseUrl}/v1/cities`, {
+export const cityGroup = () => fetch('/v1/cities', {
   type: 'group'
 }) // 全部城市
 
-export const msiteFoodTypes = geo => fetch(`${baseUrl}/v2/index_entry`, {
+export const msiteFoodTypes = geo => fetch('/v2/index_entry', {
   geohash: geo,
   group_type: '1',
   'flags[]': 'F'
@@ -30,11 +29,9 @@ export const msiteFoodTypes = geo => fetch(`${baseUrl}/v2/index_entry`, {
 export const shopList = (latitude, longitude, offset, restaurantCategoryId = '', restaurantCategoryIds = '', orderBy = '', deliveryMode = '', supportIds = []) => {
   let supportStr = ''
   supportIds.forEach(item => {
-    if (item.status) {
-      supportStr += `&support_ids[]=${item.id}`
-    }
+    supportStr += `&support_ids[]=${item}`
   })
-  return fetch(`${baseUrl}/shopping/restaurants`, {
+  return fetch('/shopping/restaurants', {
     latitude,
     longitude,
     offset,
@@ -48,57 +45,108 @@ export const shopList = (latitude, longitude, offset, restaurantCategoryId = '',
   })
 } // takeout页面店铺列表
 
-export const searchNearby = keyword => fetch(`${baseUrl}/v1/pois`, {
+export const searchNearby = keyword => fetch('/v1/pois', {
   type: 'nearby',
   keyword
 }) // 搜索附近
 
-export const searchPlace = (cityId, value) => fetch(`${baseUrl}/v1/pois`, {
+export const searchPlace = (cityId, value) => fetch('/v1/pois', {
   type: 'search',
   city_id: cityId,
   keyword: value
 }) // 搜索地址
 
-export const searchRestaurant = (geohash, keyword) => fetch(`${baseUrl}/v4/restaurants`, {
+export const searchRestaurant = (geohash, keyword) => fetch('/v4/restaurants', {
   'extras[]': 'restaurant_activity',
   geohash,
   keyword,
   type: 'search'
 }) // 店铺搜索
 
-export const foodCategory = (latitude, longitude) => fetch(`${baseUrl}/shopping/v2/restaurant/category`, {
+export const foodCategory = (latitude, longitude) => fetch('/shopping/v2/restaurant/category', {
   latitude,
   longitude
 }) // food筛选
 
-export const shopDetails = (shopId, latitude, longitude) => fetch(`${baseUrl}/shopping/restaurant/${shopId}?extras[]=activities&extras[]=album&extras[]=license&extras[]=identification&extras[]=statistics`, {
+export const shopDetails = (shopId, latitude, longitude) => fetch(`/shopping/restaurant/${shopId}?extras[]=activities&extras[]=album&extras[]=license&extras[]=identification&extras[]=statistics`, {
   latitude,
-  longitude: `${longitude}`
+  longitude
 }) // 商铺详情
 
-export const foodMenu = restaurantId => fetch(`${baseUrl}/shopping/v2/menu`, {
+export const foodMenu = restaurantId => fetch('/shopping/v2/menu', {
   restaurant_id: restaurantId
 }) // shop页面菜单列表
 
-export const getRatingList = (shopId, offset, tagName = '') => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings`, {
+export const getRatingList = (shopId, offset, tagName = '') => fetch(`/ugc/v2/restaurants/${shopId}/ratings`, {
   has_content: true,
   offset,
   limit: 10,
   tag_name: tagName
 }) // 商铺评价列表
 
-export const ratingScores = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/scores`) // 评价分数
+export const ratingScores = shopId => fetch(`/ugc/v2/restaurants/${shopId}/ratings/scores`) // 评价分数
 
-export const ratingTags = shopId => fetch(`${baseUrl}/ugc/v2/restaurants/${shopId}/ratings/tags`) // 评价分类
+export const ratingTags = shopId => fetch(`/ugc/v2/restaurants/${shopId}/ratings/tags`) // 评价分类
 
-export const foodDelivery = (latitude, longitude) => fetch(`${baseUrl}/shopping/v1/restaurants/delivery_modes`, {
+export const foodDelivery = (latitude, longitude) => fetch('/shopping/v1/restaurants/delivery_modes', {
   latitude,
   longitude,
   kw: ''
 }) // 配送方式
 
-export const foodActivity = (latitude, longitude) => fetch(`${baseUrl}/shopping/v1/restaurants/activity_attributes`, {
+export const foodActivity = (latitude, longitude) => fetch('/shopping/v1/restaurants/activity_attributes', {
   latitude,
   longitude,
   kw: ''
 }) // 商家属性活动列表
+
+export const mobileCode = phone => fetch('/v4/mobile/verify_code/send', {}, {
+  mobile: phone,
+  scence: 'login',
+  type: 'sms'
+}, 'POST') // 获取短信验证码
+
+export const captchasGet = () => fetch('/v1/captchas', {}, {}, 'POST') // 获取图片验证码
+
+export const checkExsis = (checkNumber, type) => fetch('/v1/users/exists', {
+  [type]: checkNumber,
+  type
+}) // 检测账号是否存在
+
+export const sendMobile = (sendData, captchaCode, type, password) => fetch('/v1/mobile/verify_code/send', {}, {
+  action: 'send',
+  captchaCode,
+  [type]: sendData,
+  type: 'sms',
+  way: type,
+  password
+}, 'POST') // 发送帐号
+
+export const accountLogin = (username, password, captchaCode) => fetch('/v2/login', {}, {
+  username,
+  password,
+  captcha_code: captchaCode
+}, 'POST') // 用户名登录
+
+export const sendLogin = (code, mobile, validateToken) => fetch('/v1/login/app_mobile', {}, {
+  code,
+  mobile,
+  validate_token: validateToken
+}, 'POST') // 手机号登录
+
+export const signout = () => fetch('/v2/signout') // 退出登录
+
+export const changePassword = (username, oldpassword, newpassword, confirmpassword, captchaCode) => fetch('/v2/changepassword', {}, {
+  username,
+  oldpassword,
+  newpassword,
+  confirmpassword,
+  captchaCode
+}, 'POST') // 改密码
+
+export const checkout = (geohash, entities, shopid) => fetch('/v1/carts/checkout', {}, {
+  come_form: 'web',
+  geohash,
+  entities,
+  restaurant_id: shopid
+}, 'POST') // 确认订单

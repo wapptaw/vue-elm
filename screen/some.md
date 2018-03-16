@@ -73,7 +73,7 @@
 * v-html
 * v-text
 13. better-scroll写一些实例
-14. fixed跟transform冲突
+14. //
 15. vue组件最外层元素最好不要设置class，因为可能造成class污染
 16. js异步：js有两种运行机制，一种是同步，一种是异步，异步常见的有网络请求，io操作，定时器
     > 常用的异步操作方式有: 
@@ -89,3 +89,4 @@
 18. vue组件的渲染完成的时机（使用ref获取组件计算高度时容易获取不到或则高度计算不准确，怀疑是组件渲染未完成，使用nextTick也不行啊)
     1. 当vue组件采取异步加载时无法通过ref获取组件属性，当采取同步加载时可以获取组件Vue属性,可以读取属性值，例如：this.$refs.test.$el.offsetHeight可以读取ref为test的组件的offsetHeight值
     2. 当组件内有通过异步获取的数据时，需要在数据加载完成后再获取css属性值
+19. 某一组件加载非常缓慢，可以考虑用setInterval(fn, 0)分块加载

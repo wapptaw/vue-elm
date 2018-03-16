@@ -47,5 +47,9 @@ export default {
 
   shopSearchSave (state, shopSearch) {
     state.shopSearch = shopSearch
+  },
+
+  orderFormAdd (state, orderForm) {
+    state.orderForms.unshift = orderForm
   }
 }

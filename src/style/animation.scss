@@ -8,15 +8,25 @@
 .slide-enter-to, .slide-leave {
   transform: translateY(0);
 }
-// 右侧滑入/滑出
-.right-slide-enter, .right-slide-leave-to {
+// 右侧滑入/滑出(transform)
+.right-slide-transform-enter, .right-slide-transform-leave-to {
   transform: translateX(100%);
 }
-.right-slide-enter-active, .right-slide-leave-active {
-  transition: transform .2 ease-out;
+.right-slide-transform-enter-active, .right-slide-transform-leave-active {
+  transition: transform .2s ease-out;
 }
-.right-slide-enter-to, .slide-leave {
+.right-slide-transform-enter-to, .right-slide-transform-leave {
   transform: translateX(0);
+}
+// 右侧滑入/滑出(position)
+.right-slide-position-enter, .right-slide-position-leave-to {
+  left: 100%;
+}
+.right-slide-position-enter-active, .right-slide-position-leave-active {
+  transition: left .2s ease-out;
+}
+.right-slide-position-enter-to, .right-slide-position-leave {
+  left: 0;
 }
 // 淡入淡出
 .fade-enter, .fade-leave-to {

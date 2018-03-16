@@ -5,14 +5,16 @@ import TakeOut from '../page/Home/children/TakeOut'
 import ShopSearch from '../page/Home/children/ShopSearch'
 import OrderForm from '../page/Home/children/OrderForm'
 import user from '../page/Home/children/user'
-import AddressSearch from '../page/AddressSearch'
-import CitySelect from '../page/CitySelect'
+import AddressSearch from '../page/city/AddressSearch'
+import CitySelect from '../page/city/CitySelect'
 import FoodCategory from '../page/FoodCategory'
 import FoodPage from '../page/FoodPage/FoodPage'
 import order from '../page/FoodPage/children/order'
 import evaluate from '../page/FoodPage/children/evaluate'
 import merchant from '../page/FoodPage/children/merchant'
 import shopSafe from '../page/FoodPage/children/children/shopSafe'
+import OrderConfirm from '../page/FoodPage/children/children/OrderConfirm'
+import login from '../page/login/login'
 Vue.use(Router)
 
 export default new Router({
@@ -95,6 +97,16 @@ export default new Router({
           ]
         }
       ]
+    },
+    {
+      path: '/orderConfirm',
+      name: 'orderConfirm',
+      component: OrderConfirm
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: login
     }
   ]
 })

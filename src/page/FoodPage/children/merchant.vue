@@ -1,61 +1,59 @@
 <template>
-  <div>
-    <div class="shopDetails" :style="{height: shopDetailsHeight, overflowY: 'auto'}">
-      <section class="actives">
-        <h2>活动与属性</h2>
-        <ul class="ulActive">
-          <li
-            v-for="active in actives"
-            :key="active.id"
-            class="active">
-            <span
-              class="activeIcon"
-              :style="{backgroundColor: `#${active.icon_color}`}">{{active.icon_name}}</span>
-            <p class="activeContent">{{active.description}}</p>
-          </li>
-        </ul>
-      </section>
-      <section class="safe">
-        <header class="safeTitle">
-          <h2>食品监督安全公示</h2>
-          <router-link tag="span" :to="{name: 'shopSafe'}" class="safeDetail">企业认证详情></router-link>
-        </header>
-        <section class="safeMessage">
-          <img v-if="shopDetailsData.status == 1" src="" alt="好">
-          <img v-else src="" alt="差">
-          <section class="safeResult">
-            <div class="result">
-              <span>监督检查结果：</span>
-              <span v-if="shopDetailsData.status == 1" class="shopStatusH">良好</span>
-              <span v-else class="shopStatusB">差</span>
-            </div>
-            <div class="date">
-              <span>检查日期：</span>
-              <time>{{shopDetailsData.identification.identificate_date}}</time>
-            </div>
-          </section>
+  <div class="shopDetails" :style="{height: shopDetailsHeight, overflowY: 'auto'}">
+    <section class="actives">
+      <h2>活动与属性</h2>
+      <ul class="ulActive">
+        <li
+          v-for="active in actives"
+          :key="active.id"
+          class="active">
+          <span
+            class="activeIcon"
+            :style="{backgroundColor: `#${active.icon_color}`}">{{active.icon_name}}</span>
+          <p class="activeContent">{{active.description}}</p>
+        </li>
+      </ul>
+    </section>
+    <section class="safe">
+      <header class="safeTitle">
+        <h2>食品监督安全公示</h2>
+        <router-link tag="span" :to="{name: 'shopSafe'}" class="safeDetail">企业认证详情></router-link>
+      </header>
+      <section class="safeMessage">
+        <img v-if="shopDetailsData.status == 1" src="" alt="好">
+        <img v-else src="" alt="差">
+        <section class="safeResult">
+          <div class="result">
+            <span>监督检查结果：</span>
+            <span v-if="shopDetailsData.status == 1" class="shopStatusH">良好</span>
+            <span v-else class="shopStatusB">差</span>
+          </div>
+          <div class="date">
+            <span>检查日期：</span>
+            <time>{{shopDetailsData.identification.identificate_date}}</time>
+          </div>
         </section>
       </section>
-      <section class="detail">
-        <h2>商家信息</h2>
-        <section class="shopMessage">
-          <h3 class="shopName">{{shopDetailsData.name}}</h3>
-          <p class="address">{{shopDetailsData.address}}</p>
-          <span class="opendingHours">营业时间：{{shopDetailsData.opening_hours[0]}}</span>
-          <span class="busunessLicense">
-            <span>营业执照：</span>
-            <img :src="`${imgBaseUrl2}${shopDetailsData.business_license_image}`" alt="营业执照">
-          </span>
-          <span class="serviceLicense">
-            <span>餐饮服务许可证：</span>
-            <img :src="`${imgBaseUrl2}${shopDetailsData.catering_service_license_image}`" alt="餐饮许可证">
-          </span>
-        </section>
+    </section>
+    <section class="detail">
+      <h2>商家信息</h2>
+      <section class="shopMessage">
+        <h3 class="shopName">{{shopDetailsData.name}}</h3>
+        <p class="address">{{shopDetailsData.address}}</p>
+        <span class="opendingHours">营业时间：{{shopDetailsData.opening_hours[0]}}</span>
+        <span class="busunessLicense">
+          <span>营业执照：</span>
+          <img :src="`${imgBaseUrl2}${shopDetailsData.business_license_image}`" alt="营业执照">
+        </span>
+        <span class="serviceLicense">
+          <span>餐饮服务许可证：</span>
+          <img :src="`${imgBaseUrl2}${shopDetailsData.catering_service_license_image}`" alt="餐饮许可证">
+        </span>
       </section>
-      <transition name="fade" mode="out-in">
-        <router-view></router-view>
-      </transition>
-    </div>
+    </section>
+    <transition name="right-slide-transform">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 

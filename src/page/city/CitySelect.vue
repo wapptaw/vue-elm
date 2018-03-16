@@ -41,8 +41,8 @@
               <h5>{{item}}</h5>
               <ul class="cityBox">
                 <v-touch
-                  tag="li"
                   v-for="city in groupCity[item]"
+                  tag="li"
                   :key="city.id"
                   @tap="changeCity(city)"
                   class="cityName">
@@ -58,9 +58,9 @@
 </template>
 
 <script>
-import TopBack from '../components/common/TopBack'
-import SearchBox from '../components/common/SearchBox'
-import {cityHot, cityGroup} from '../service/getData'
+import TopBack from '../../components/common/TopBack'
+import SearchBox from '../../components/common/SearchBox'
+import {cityHot, cityGroup} from '../../service/getData'
 import {mapState, mapMutations} from 'vuex'
 
 export default {
@@ -96,7 +96,7 @@ export default {
 
   mounted () {
     this.hotCityGet()
-    this.pageLoad()
+    this.groupCityGet()
     this.$nextTick(() => {
       let topContent = this.$refs.topContent
       this.topContentHeight = topContent.offsetHeight
@@ -104,15 +104,6 @@ export default {
   },
 
   methods: {
-    async pageLoad () { // 推迟所有城市列表加载
-      try {
-        await this.hotCityGet()
-        await this.groupCityGet()
-      } catch (e) {
-        throw new Error(e)
-      }
-    },
-
     async hotCityGet () {
       try {
         let res = await cityHot()
@@ -139,11 +130,16 @@ export default {
           this.cityGroupDataSave(res)
         }
         this.groupCity = res
-        let cityGroupKey = []
-        for (let v in res) {
-          cityGroupKey.push(v)
-        }
-        this.cityGroupKey = cityGroupKey.sort()
+        let cityGroupKey = Object.keys(this.groupCity)
+        let cityGroupKeySort = cityGroupKey.sort()
+        let cityGroupKeySortLen = cityGroupKeySort.length
+        let count = 0
+        let timer = setInterval(() => {
+          this.cityGroupKey.push(cityGroupKeySort[count++])
+          if (count === cityGroupKeySortLen) {
+            clearInterval(timer)
+          }
+        }, 0)
       } catch (e) {
         throw new Error(e)
       }

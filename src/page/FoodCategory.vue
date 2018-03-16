@@ -83,41 +83,47 @@
           <section class="deliveryMode">
             <h3 class="deliveryName">配送方式</h3>
             <ul class="deliveryModeUl">
-              <li
+              <v-touch
                 v-for="mode in foodDeliveryData"
                 :key="mode.id"
-                class="deliveryModeLi">
+                tag="li"
+                class="deliveryModeLi"
+                :class="{deliverySeleted: mode.id === deliveryMode}"
+                @tap="toggleDelivery(mode.id)">
                 <span class="deliveryModeText">{{mode.text}}</span>
-              </li>
+              </v-touch>
             </ul>
           </section>
           <section class="activity">
             <h3 class="activityName">商家属性（可以多选）</h3>
             <ul class="activityUl">
-              <li
+              <v-touch
                 v-for="item in foodActivityData"
                 :key="item.id"
-                class="activityLi">
+                tag="li"
+                class="activityLi"
+                :class="{activitySelected: supportIds.includes(item.id)}"
+                @tap="toggleActivity(item.id)">
                 <span :style="{color: `#${item.icon_color}`, border: `1px solid #${item.icon_color}`}" class="activityIcon">{{item.icon_name}}</span>
                 <span class="activityText">{{item.name}}</span>
-              </li>
+              </v-touch>
             </ul>
           </section>
           <header class="activityOptionConfirm">
-            <input type="button" value="清空" class="clear">
-            <input type="button" value="确定" class="confirm">
+            <v-touch tag="input" type="button" value="清空" class="clear" @tap="clearMore" />
+            <v-touch tag="input" type="button" :value="`确定${confirmValue}`" class="confirm" @tap="confirmMore" />
           </header>
         </section>
       </transition>
     </section>
     <scroll
       :click="true"
-      :style="{height: scrollHeight, overflowY: 'auto'}">
+      :style="{height: scrollHeight, overflowY: 'auto'}"> <!-- 下拉加载先不写 -->
       <ShopList :shopListData="shopListData"></ShopList>
     </scroll>
     <transition name="fade">
       <v-touch
-        v-if="blackScreenShow"
+        v-if="blackScreenShow !== filterMark"
         tag="div"
         class="blackScreen"
         :style="{height: scrollHeight}"
@@ -171,7 +177,7 @@ export default {
       filterMark: '', // 控制过滤选项的显示和消失
       imgBaseUrl,
       indexSelected: 0, // 具体餐种选项的选中序号
-      blackScreenShow: false,
+      blackScreenShow: '',
       scrollHeight: 'auto',
       sortItems: [
         {
@@ -203,14 +209,17 @@ export default {
   },
 
   computed: {
-    filterCategoryRightData () {
-      let data = []
-      if (this.foodCategoryData.length > 0) {
-        for (let v of this.filterCategoryRightData) {
-          data.push(v.sub_categories)
+    confirmValue () { // 确认按钮数字计算
+      let supportIdsNum = this.supportIds.length
+      if (this.deliveryMode === '') {
+        if (supportIdsNum > 0) {
+          return `(${supportIdsNum})`
+        } else {
+          return ''
         }
+      } else {
+        return `(${supportIdsNum + 1})`
       }
-      return data
     },
 
     ...mapState([
@@ -234,9 +243,17 @@ export default {
   methods: {
     async shopListDataGet () { // 商铺的列表
       try {
-        let res = await shopList(this.latitude, this.longitude, this.offset, this.$route.query.restaurantCategoryId, this.restaurantCategoryIds)
+        let res = await shopList(
+          this.latitude,
+          this.longitude,
+          this.offset,
+          this.$route.query.restaurantCategoryId,
+          this.restaurantCategoryIds,
+          this.orderBy,
+          this.deliveryMode,
+          this.supportIds
+          )
         this.shopListData = res
-        console.log(res)
       } catch (e) {
         throw new Error(e)
       }
@@ -253,7 +270,6 @@ export default {
         }
         res[0].categoryLeftSelected = true
         this.foodCategoryData = res
-        // console.log(res)
       } catch (e) {
         throw new Error(e)
       }
@@ -263,7 +279,7 @@ export default {
       try {
         let res = await foodDelivery(this.latitude, this.longitude)
         this.foodDeliveryData = res
-        // console.log(res)
+        console.log(res)
       } catch (e) {
         throw new Error(e)
       }
@@ -273,7 +289,6 @@ export default {
       try {
         let res = await foodActivity(this.latitude, this.longitude)
         this.foodActivityData = res
-        // console.log(res)
       } catch (e) {
         throw new Error(e)
       }
@@ -282,13 +297,11 @@ export default {
     optionShow (id, index) {
       if (this.filterMark === id) { // 过滤方式的展开控制
         this.filterMark = ''
-        this.blackScreenShow = false
         if (index === 0) {
           this.guide[0].name = this.categoryTitle
         }
       } else {
         this.filterMark = id
-        this.blackScreenShow = true
         if (index === 0) {
           this.guide[0].name = '分类'
         }
@@ -321,11 +334,9 @@ export default {
       })
       await this.shopListDataGet()
       this.filterMark = ''
-      this.blackScreenShow = false
     },
 
-    screenTap () {
-      this.blackScreenShow = false
+    screenTap () { // 点击遮罩
       this.filterMark = ''
     },
 
@@ -383,7 +394,37 @@ export default {
           break
       }
       this.filterMark = ''
-      this.blackScreenShow = false
+    },
+
+    toggleDelivery (id) { // 配送方式选择
+      if (this.deliveryMode === id) {
+        this.deliveryMode = ''
+      } else {
+        this.deliveryMode = id
+      }
+    },
+
+    toggleActivity (id) { // more筛选
+      if (this.supportIds.includes(id)) {
+        let pos = this.supportIds.findIndex((value) => {
+          return value === id
+        })
+        if (pos !== -1) {
+          this.supportIds.splice(pos, 1)
+        }
+      } else {
+        this.supportIds.push(id)
+      }
+    },
+
+    clearMore () { // 清空筛选选项
+      this.deliveryMode = ''
+      this.supportIds.splice(0)
+    },
+
+    async confirmMore () { // 确认结果进行筛选
+      await this.shopListDataGet()
+      this.filterMark = ''
     }
   }
 }
@@ -546,6 +587,11 @@ export default {
             color: #414141;
           }
         }
+        .deliverySeleted {
+          .deliveryModeText {
+            color: #2ddada;
+          }
+        }
       }
     }
     .activity {
@@ -574,6 +620,11 @@ export default {
           .activityText {
             font-size: .13rem;
             color: #414141;
+          }
+        }
+        .activitySelected {
+          .activityText {
+            color: #2ddada;
           }
         }
       }
