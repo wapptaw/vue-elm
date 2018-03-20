@@ -54,18 +54,11 @@
         <p class="hint">注册过的用户可凭账号密码登录</p>
         <v-touch tag="div" class="loginButton" @tap="login">登录</v-touch>
         <div class="resentPassword">
-          <span>重置密码？</span>
+          <span>忘记密码？</span>
         </div>
       </section>
-      <transition name="fade">
-        <div v-if="popup" class="shade"></div>
-      </transition>
-      <transition name="shake"> 
-        <div v-if="popup" class="popup">
-          <p class="warnMessage">{{warnMessage}}</p>
-          <v-touch tag="div" class="confirm" @tap="warnConfirm">确定</v-touch>
-        </div>
-      </transition>
+      <matte-opacity v-if="popup"></matte-opacity>
+      <pop-up v-if="popup" :warnMessage="warnMessage" @warnConfirm="warnConfirm"></pop-up>
     </div>
   </transition>
 </template>
@@ -73,12 +66,16 @@
 <script>
 import TopBack from '../../components/common/TopBack'
 import {captchasGet, accountLogin, mobileCode, checkExsis, sendLogin} from '../../service/getData'
+import {mapMutations} from 'vuex'
+import userInfoTest from '../../plugin/userInfo'
 
 export default {
   name: 'login',
 
   components: {
-    TopBack
+    TopBack,
+    PopUp: () => import('../../components/common/PopUp'),
+    MatteOpacity: () => import('../../components/common/MatteOpacity')
   },
 
   data () {
@@ -163,13 +160,21 @@ export default {
             this.warnMessage = '请输入验证码'
           } else {
             let res = await accountLogin(this.userName, this.password, this.captchaText) // 无限验证码失效问题解决不了，没救了，我就假装登陆成功了
-            this.userInfo = res
+            if (res.status === 1) { // 为了假装登录成功，把status改为等于1,实际上是等于0
+              this.popup = true
+              this.warnMessage = res.message
+            } else {
+              this.userInfo = res
+              this.userInfo = userInfoTest // 测试用数据
+              this.saveUserInfoBack()
+            }
           }
         } else if (this.loginType === 'loginByPhoneNum') {
           let exist = await this.verifyPhoneNum(this.phoneNum)
           if (exist) {
             let res = await sendLogin(this.code, this.phoneNum, this.validateToken)
             this.userInfo = res
+            this.saveUserInfoBack()
           }
         }
       } catch (e) {
@@ -204,7 +209,16 @@ export default {
 
     warnConfirm () { // 错误提示弹窗
       this.popup = false
-    }
+    },
+
+    saveUserInfoBack () { // 保存用户信息然后返回
+      this.userInfoSave(this.userInfo)
+      this.$router.go(-1)
+    },
+
+    ...mapMutations([
+      'userInfoSave'
+    ])
   }
 }
 </script>
@@ -343,80 +357,4 @@ export default {
       }
     }
   }
-  .popup {
-    width: 80%;
-    height: 20%;
-    background-color: #ebebeb;
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: scale(1) translate(-50%, -50%);
-    padding: .05rem;
-    box-sizing: border-box;
-    border-radius: .05rem;
-    .warnMessage {
-      line-height: .25rem;
-      font-size: .16rem;
-      color: #5e5e5e;
-      padding: .1rem;
-    }
-    .confirm {
-      width: 95%;
-      height: 25%;
-      border-radius: .05rem;
-      background-color: #2996d4;
-      color: #fff;
-      font-size: .15rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      bottom: .1rem;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-  }
-  .shade {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    background-color: rgba(0, 0, 0, 0.5);
-    left: 0;
-    top: 0;
-  }
-  .shake-enter-active {
-    animation: shake .4s;
-  }
-  .fade-enter-active {
-    animation: fade .2s;
-  }
-  .fade-leave-active {
-    animation: fade .2s reverse;
-  }
-  @keyframes shake {
-    0% {
-      transform: translate(-50%, -50%) scale(0);
-    }
-    25% {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-    50% {
-      transform: translate(-50%, -50%) scale(1);
-    }
-    75% {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(1);
-    }
-  }
-  @keyframes fade {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: .5;
-    }
-  }
 </style>
-

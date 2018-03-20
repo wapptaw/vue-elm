@@ -1,7 +1,7 @@
 <template>
   <div
     :style="boxStyle"
-    class="prompBox">
+    class="promptBox">
     <slot></slot>
   </div>
 </template>
@@ -26,7 +26,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.prompBox {
+.promptBox {
   width: 100%;
   left: 0;
   display: flex;

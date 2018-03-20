@@ -83,9 +83,9 @@
         </div>
       </div>
     </div>
-    <promptBox :boxStyle="loadStyle">
+    <prompt-box :boxStyle="loadStyle">
       <span>{{loadContent}}</span>
-    </promptBox>
+    </prompt-box>
   </scroll>
 </template>
 
@@ -100,7 +100,7 @@ export default {
   components: {
     ShopList: async () => import('../../../components/common/ShopList'), // 异步加载组件
     scroll: async () => import('../../../components/common/scroll'),
-    promptBox: async () => import('../../../components/common/promptBox')
+    PromptBox: async () => import('../../../components/common/PromptBox')
   },
 
   data () {

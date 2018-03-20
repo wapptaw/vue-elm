@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import TopBack from '../../../../components/common/TopBack'
+import TopBack from '../../components/common/TopBack'
 
 export default {
   name: 'OrderConfirm',

@@ -13,8 +13,13 @@ import order from '../page/FoodPage/children/order'
 import evaluate from '../page/FoodPage/children/evaluate'
 import merchant from '../page/FoodPage/children/merchant'
 import shopSafe from '../page/FoodPage/children/children/shopSafe'
-import OrderConfirm from '../page/FoodPage/children/children/OrderConfirm'
+import OrderConfirm from '../page/formPay/OrderConfirm'
 import login from '../page/login/login'
+import userInfo from '../page/Home/children/children/userInfo'
+import resetPassword from '../page/forget/resetPassword'
+import deliveryAddress from '../page/deliveryAddress/deliveryAddress'
+import addressAdd from '../page/deliveryAddress/chilren/addressAdd'
+import addressNearby from '../page/deliveryAddress/chilren/addressNearby'
 Vue.use(Router)
 
 export default new Router({
@@ -46,7 +51,14 @@ export default new Router({
         {
           path: 'user',
           name: 'user',
-          component: user
+          component: user,
+          children: [
+            {
+              path: 'userinfo',
+              name: 'userinfo',
+              component: userInfo
+            }
+          ]
         }
       ]
     },
@@ -107,6 +119,28 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: login
+    },
+    {
+      path: '/resetpassword',
+      name: 'resetPassword',
+      component: resetPassword
+    },
+    {
+      path: '/deliveryAddress',
+      name: 'deliveryAddress',
+      component: deliveryAddress,
+      children: [
+        {
+          path: 'addressAdd',
+          name: 'addressAdd',
+          component: addressAdd
+        },
+        {
+          path: 'addressNearby',
+          name: 'addressNearby',
+          component: addressNearby
+        }
+      ]
     }
   ]
 })

@@ -90,3 +90,17 @@
     1. 当vue组件采取异步加载时无法通过ref获取组件属性，当采取同步加载时可以获取组件Vue属性,可以读取属性值，例如：this.$refs.test.$el.offsetHeight可以读取ref为test的组件的offsetHeight值
     2. 当组件内有通过异步获取的数据时，需要在数据加载完成后再获取css属性值
 19. 某一组件加载非常缓慢，可以考虑用setInterval(fn, 0)分块加载
+20. ```
+    new Vue({
+      computed: {
+        test () {
+          return [
+            test1 () {
+              return this.test2 // 这里的this指向的不是vue实例，而是全局对象，可以考虑在test函数里用_this替代this, 首行使用_this = this
+            }
+          ]
+        }
+      }
+    })
+    ```
+21. 层叠上下文元素的层级，谁大谁上，自由元素根据父元素确定层级

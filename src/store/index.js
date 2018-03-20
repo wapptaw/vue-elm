@@ -25,7 +25,9 @@ const state = {
     searchData: [],
     searchHistory: []
   },
-  orderForms: []
+  orderForms: [],
+  userInfo: '', // 用户信息
+  addressTS: {} // 收获地址输入信息暂存
 }
 
 export default new Vuex.Store({

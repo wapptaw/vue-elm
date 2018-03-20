@@ -51,5 +51,15 @@ export default {
 
   orderFormAdd (state, orderForm) {
     state.orderForms.unshift = orderForm
+  },
+
+  userInfoSave (state, userInfo) { // 用户数据存储
+    state.userInfo = userInfo
+  },
+
+  addressTemporaryDataSave (state, ts) { // 收货信息暂存
+    for (let v in ts) {
+      state.addressTS[v] = ts[v]
+    }
   }
 }
