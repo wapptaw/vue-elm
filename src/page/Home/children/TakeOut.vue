@@ -415,6 +415,7 @@ export default {
     position: relative;
     border: 1px solid rgba(0, 0, 0, 0);
     overflow: hidden;
+    background-color: #fff;
   }
   .foodNav {
     width: 100%;

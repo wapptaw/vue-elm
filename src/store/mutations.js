@@ -61,5 +61,17 @@ export default {
     for (let v in ts) {
       state.addressTS[v] = ts[v]
     }
+  },
+
+  addressSelectSave (state, address) { // 选中的地址保存
+    state.deliveryAddress = address
+  },
+
+  invoiceTypeSave (state, invoiceType) { // 保存发票信息
+    state.invoiceType = invoiceType
+  },
+
+  payAmountSave (state, payAmount) { // 需要支付的钱数
+    state.payAmount = payAmount
   }
 }

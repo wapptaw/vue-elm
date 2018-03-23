@@ -62,6 +62,7 @@ export default {
     padding: .1rem .05rem;
     display: flex;
     justify-content: space-between;
+    background-color: #fff;
     .searchVal, .searchBox {
       height: .4rem;
       line-height: .4rem;

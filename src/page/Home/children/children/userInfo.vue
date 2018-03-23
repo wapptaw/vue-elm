@@ -84,6 +84,7 @@ export default {
     async logout () { // 退出登录
       try {
         let res = await signout() // 退出登录是不可能成功的，因为我压根都没登陆上，所以就不模拟了
+        res.slice()
         this.$router.go(-1)
       } catch (e) {
         throw new Error(e)

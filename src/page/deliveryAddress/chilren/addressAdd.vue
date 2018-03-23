@@ -157,7 +157,7 @@ export default {
     },
 
     async addressAdd () {
-      let res = await addressAdd(this.userInfo.user_id, this.pos, this.addressMore, this.geohash, this.name, this.phone, this.sex, this.tag)
+      let res = await addressAdd(this.userInfo.user_id, this.addressMore, this.pos, this.geohash, this.name, this.phone, this.sex, this.tag)
       return res
     },
 

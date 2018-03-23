@@ -20,6 +20,9 @@ import resetPassword from '../page/forget/resetPassword'
 import deliveryAddress from '../page/deliveryAddress/deliveryAddress'
 import addressAdd from '../page/deliveryAddress/chilren/addressAdd'
 import addressNearby from '../page/deliveryAddress/chilren/addressNearby'
+import remark from '../page/formPay/children/remark'
+import invoice from '../page/formPay/children/invoice'
+import payPage from '../page/formPay/children/payPage'
 Vue.use(Router)
 
 export default new Router({
@@ -111,9 +114,29 @@ export default new Router({
       ]
     },
     {
-      path: '/orderConfirm',
+      path: '/orderConfirm/:shopId',
       name: 'orderConfirm',
-      component: OrderConfirm
+      component: OrderConfirm,
+      props: true,
+      children: [
+        {
+          path: 'remark',
+          name: 'remark',
+          component: remark,
+          props: true
+        },
+        {
+          path: 'invoice',
+          name: 'invoice',
+          component: invoice,
+          props: true
+        },
+        {
+          path: 'payPage',
+          name: 'payPage',
+          component: payPage
+        }
+      ]
     },
     {
       path: '/login',

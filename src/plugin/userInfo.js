@@ -5,12 +5,12 @@ export default {
   city: '北京',
   registe_time: '2018-03-16 14:55',
   column_desc: {
-      gift_mall_desc: '0元好物在这里',
-      game_link: 'https://gamecenter.faas.ele.me',
-      game_is_show: 1,
-      game_image_hash: '05f108ca4e0c543488799f0c7c708cb1jpeg',
-      game_desc: '玩游戏领红包'
-    },
+    gift_mall_desc: '0元好物在这里',
+    game_link: 'https://gamecenter.faas.ele.me',
+    game_is_show: 1,
+    game_image_hash: '05f108ca4e0c543488799f0c7c708cb1jpeg',
+    game_desc: '玩游戏领红包'
+  },
   point: 0,
   mobile: '',
   is_mobile_valid: true,

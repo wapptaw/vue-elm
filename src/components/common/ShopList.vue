@@ -77,11 +77,15 @@ export default {
   align-items: center;
 }
 .ulShopList {
+  background-color: #dadada;
+  padding-top: .05rem;
   .liShopList {
     @extend %spaceBetween;
     width: 100%;
     padding: .1rem .1rem;
     box-sizing: border-box;
+    background-color: #fff;
+    margin: .05rem 0;
     .shopIcon {
       width: 20%;
       height: 100%;

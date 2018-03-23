@@ -34,5 +34,7 @@ export default {
   align-items: center;
   position: absolute;
   overflow: hidden;
+  background-color: #fff;
+  color: #555555;
 }
 </style>

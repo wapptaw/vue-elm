@@ -1,9 +1,18 @@
 <template>
   <div>
     <top-back title="我的地址"></top-back>
-    <section>
-      <ul>
-        <li v-for="item in addressList" :key="item"></li>
+    <section class="addressAddContainer">
+      <ul class="addressUl">
+        <v-touch
+          tag="li"
+          v-for="item in addressList"
+          :key="item.id"
+          class="addressList"
+          @tap="addressSelect(item)">
+          <p class="name">姓名：{{item.name}}</p>
+          <p class="address">地址：{{item.address}}</p>
+          <p class="phone">手机：{{item.phone}}</p>
+        </v-touch>
       </ul>
       <router-link
         :to="{name: 'addressAdd'}"
@@ -20,7 +29,7 @@
 <script>
 import TopBack from '../../components/common/TopBack'
 import {getAddressList} from '../../service/getData'
-import {mapState} from 'vuex'
+import {mapState, mapMutations} from 'vuex'
 
 export default {
   name: 'deliveryAddress',
@@ -49,16 +58,51 @@ export default {
     async addressListGet () { // api不太好用，所以这一页就不写了，以后再说
       try {
         let res = await getAddressList(this.userInfo.user_id)
-        console.log(res)
+        this.addressList = res
       } catch (e) {
         throw new Error(e)
       }
-    }
+    },
+
+    addressSelect (item) {
+      this.addressSelectSave(item)
+      this.$router.go(-1)
+    },
+
+    ...mapMutations([
+      'addressSelectSave'
+    ])
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.addressAddContainer {
+  .addressUl {
+    background-color: #e9e9e9;
+    padding: 1px 0; // 因为外边距撑不起父元素，露不出父元素的背景颜色，所以加了padding撑起父元素
+    .addressList {
+      background-color: #fff;
+      margin: .1rem 0;
+      padding: 0 .15rem;
+      p {
+        line-height: .25rem;
+      }
+      .name {
+        font-size: .14rem;
+        font-weight: bold;
+        color: #4e4e4e;
+      }
+      .address {
+        font-size: .13rem;
+        color: #707070;
+      }
+      .phone {
+        font-size: .12rem;
+        color: #919191;
+      }
+    }
+  }
   .add {
     position: fixed;
     left: 50%;
@@ -76,5 +120,6 @@ export default {
       color: #fff;
     }
   }
+}
 </style>
 

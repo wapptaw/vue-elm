@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{backgroundColor: '#fff', height: '100vh'}">
     <div>
       <TopBack title="美食选择"  @heightGet="topBackHeightGet"></TopBack>
       <SearchBox
@@ -139,25 +139,31 @@ export default {
 
 <style lang="scss" scoped>
 .searchHistory {
-  padding: 0 .1rem;
+  background-color: #e9e9e9;
   .title {
-    font-size: .16rem;
-    color: #5c5c5c;
+    margin-left: .1rem;
+    font-size: .14rem;
+    color: #242424;
+    background-color: #fff;
+    padding-bottom: .1rem;
   }
   .ulHistories {
-    padding: .1rem 0;
     .liHistory {
-      padding: .05rem .1rem;
+      padding: 0 .15rem;
+      margin: .02rem 0;
+      line-height: .25rem;
       font-size: .14rem;
       color: #555555;
-      background-color: #e9e9e9;
+      background-color: #fff;
       border-bottom: 1px solid #fff;
     }
   }
   .clearHistory {
+    padding-top: .1rem;
     font-size: .14rem;
     color: #888888;
     text-align: center;
+    background-color: #fff;
   }
 }
 </style>

@@ -27,7 +27,15 @@ const state = {
   },
   orderForms: [],
   userInfo: '', // 用户信息
-  addressTS: {} // 收获地址输入信息暂存
+  addressTS: {}, // 收获地址输入信息暂存
+  deliveryAddress: '', // 收货地址
+  invoiceType: {
+    type: '不开发票',
+    title: '不需要发票',
+    selected: true,
+    needTitle: false
+  }, // 发票类型
+  payAmount: 0 // 支付的钱数
 }
 
 export default new Vuex.Store({

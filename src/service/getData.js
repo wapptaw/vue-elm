@@ -143,7 +143,7 @@ export const addressGet = (id, sig) => fetch(`/v1/carts/${id}/addresses`, {
   sig
 }) // 获取地址列表
 
-export const getAddressList = (userId) => fetch('/v1/users/'+userId+'/addresses')
+export const getAddressList = (userId) => fetch('/v1/users/' + userId + '/addresses')
 
 export const searchNearby = keyword => fetch('/v1/pois', {
   type: 'nearby',
@@ -152,7 +152,7 @@ export const searchNearby = keyword => fetch('/v1/pois', {
 
 export const addressListGet = userId => fetch(`/v1/users/${userId}/addresses`) // 编辑地址
 
-export const addressDelete = (userId, addressId) => fetch(`/v1/users/${userid}/addresses/${addressid}, {}, {} 'DELETE`) // 删除地址
+export const addressDelete = (userId, addressId) => fetch(`/v1/users/${userId}/addresses/${addressId}, {}, {} 'DELETE`) // 删除地址
 
 export const checkout = (geohash, entities, shopid) => fetch('/v1/carts/checkout', {}, {
   come_form: 'web',
@@ -205,9 +205,13 @@ export const payRequest = (merchantOrderNo, userId) => fetch('/payapi/payment/qu
   version: '1.0.0'
 }) // 重新发送订单验证码
 
-export const orderListGet = (userId, offset) => fetch(`/bos/v2/users/${user_id}/orders`, {
+export const orderListGet = (userId, offset) => fetch(`/bos/v2/users/${userId}/orders`, {
   limit: 10,
   offset
 }) // 获取订单列表
 
-export const orderDetailGet = (userId, orderId) => fetch(`/bos/v1/users/${user_id}/orders/${orderid}/snapshot`) // 获取订单详情
+export const orderDetailGet = (userId, orderId) => fetch(`/bos/v1/users/${userId}/orders/${orderId}/snapshot`) // 获取订单详情
+
+export const getRemark = (id, sig) => fetch('/v1/carts/' + id + '/remarks', {
+  sig
+}) // 获取备注列表

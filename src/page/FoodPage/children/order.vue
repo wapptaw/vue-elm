@@ -107,7 +107,7 @@
       <v-touch tag="span" class="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
       <span class="totalPrices">￥{{sum.totalPrices}}</span>
       <router-link
-        :to="{name: 'orderConfirm'}"
+        :to="{path: `/orderConfirm/${id}`}"
         tag="span"
         event="touchend"
         class="pay">
