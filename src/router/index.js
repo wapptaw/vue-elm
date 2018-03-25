@@ -53,9 +53,10 @@ export default new Router({
           component: OrderForm,
           children: [
             {
-              path: 'orderFormDetail',
+              path: 'orderFormDetail/:orderId',
               name: 'orderFormDetail',
-              component: orderFormDetail
+              component: orderFormDetail,
+              props: true
             }
           ]
         },

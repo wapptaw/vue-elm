@@ -1,11 +1,13 @@
 <template>
   <div>
-    <TopBack title="我的订单"></TopBack>
-    <section class="orderForm">
+    <TopBack title="我的订单" ref="topBack"></TopBack>
+    <section class="orderForm" :style="{height: orderFormHeight + 'px'}">
       <ul class="orderFormUl">
-        <li
+        <router-link
           v-for="item in orderListData"
           :key="item.id"
+          :to="{name: 'orderFormDetail', params: {orderId: item.id}}"
+          tag="li"
           class="orderFormLi">
           <span class="headIcon">
             <img :src="`${imgBaseUrl2}${item.restaurant_image_url}`">
@@ -23,11 +25,11 @@
               <span>￥{{item.basket | sumPrice}}</span>
             </section>
             <footer class="overtime">
-              <span v-if="new Date() - new Date(item.formatted_created_at) > 0" class="countDown">{{item.formatted_created_at}}</span>
+              <span v-if="item.interval > 0" class="countDown">剩余支付时间：{{item.remainingTime}}</span>
               <span v-else class="again">再来一单</span>
             </footer>
           </section>
-          </li>
+        </router-link>
       </ul>
     </section>
     <transition name="right-slide-transform">
@@ -60,20 +62,13 @@ export default {
       }
       let packingFee = basket.packing_fee.price * basket.packing_fee.quantity
       return deliverFee + foodFee + packingFee
-    },
+    }
+  },
 
-    countDown (createDate) {
-      let timer = setInterval(() => {
-        let time = new Date() - new Date(createDate)
-        if (time < 0) {
-          clearInterval(timer)
-          return
-        } else {
-          let minute = parseInt(time / (1000 * 60))
-          let second = parseInt(time % (1000 * 60) / 1000)
-          // 返回值返回不出去啊，咋办
-        }
-      }, 1000)
+  props: {
+    btmNavH: {
+      type: Number,
+      default: 0
     }
   },
 
@@ -81,29 +76,54 @@ export default {
     return {
       offset: 0,
       orderListData: '',
-      imgBaseUrl2
+      imgBaseUrl2,
+      orderFormHeight: 0
     }
   },
 
   computed: {
     ...mapState([
-      'userInfo'
+      'userInfo',
+      'clientHeight'
     ])
   },
 
   mounted () {
     this.orderList()
+    this.orderFormHeightGet()
   },
 
   methods: {
     async orderList () { // 订单列表获取
       try {
         let res = await orderListGet(this.userInfo.user_id, this.offset)
-        console.log(res)
+        res.forEach((item) => {
+          item.interval = new Date(item.formatted_created_at).getTime() + 15 * 60 * 1000 - new Date().getTime()
+          item.remainingTime = 0
+          this.countDown(item)
+        })
         this.orderListData = res
       } catch (e) {
         throw new Error(e)
       }
+    },
+
+    countDown (item) { // 支付倒计时
+      let timer = setInterval(() => {
+        let time = new Date(item.formatted_created_at).getTime() + 15 * 60 * 1000 - new Date().getTime()
+        if (time < 0) {
+          item.interval = 0
+          clearInterval(timer)
+        } else {
+          let minute = parseInt(time / (1000 * 60))
+          let second = parseInt(time % (1000 * 60) / 1000)
+          item.remainingTime = `${minute > 9 ? minute : '0' + minute}分${second > 9 ? second : '0' + second}秒`
+        }
+      }, 1000)
+    },
+
+    orderFormHeightGet () { // 计算高度
+      this.orderFormHeight = this.clientHeight - this.btmNavH - this.$refs.topBack.$el.offsetHeight
     }
   }
 }
