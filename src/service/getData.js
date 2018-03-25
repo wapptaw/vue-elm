@@ -174,6 +174,17 @@ export const addressAdd = (userId, address, addressDetail, geohash, name, phone,
   tag_type: tagType
 }, 'POST') // 添加地址
 
+export const placeOrders = (userId, cartId, addressId, description, entities, geohash, sig) => fetch('/v1/users' + userId + '/carts/' + cartId + '/orders', {}, {
+  address_id: addressId,
+  come_form: 'mobile_web',
+  deliver_time: '',
+  description,
+  entities,
+  geohash,
+  paymethod_id: 1,
+  sig
+}, 'POST') // 下订单
+
 export const validateOrder = ({
   userId,
   cartId,

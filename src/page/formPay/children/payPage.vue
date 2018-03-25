@@ -2,9 +2,10 @@
   <div class="payPage">
     <top-back title="支付"></top-back>
     <section class="payTypeContainer">
-      <section>
+      <p v-if="overtime" class="overtime">支付超时，请重新下单</p>
+      <section v-else class="countDown">
         <h3>支付剩余时间：</h3>
-        <div>{{time}}</div>
+        <div class="time">{{time}}</div>
       </section>
       <ul v-if="$route.query.payMode === 'online'" class="payTypeUl">
         <v-touch
@@ -43,6 +44,7 @@
 
 <script>
 import TopBack from '../../../components/common/TopBack'
+import {mapState} from 'vuex'
 
 export default {
   name: 'payPage',
@@ -74,8 +76,16 @@ export default {
 
       warnMessage: '',
       popup: false,
-      time: ''
+      time: '',
+      overtime: false // 支付是否超时
     }
+  },
+
+  computed: {
+    ...mapState([
+      'orderTime',
+      'orderData'
+    ])
   },
 
   mounted () {
@@ -104,15 +114,24 @@ export default {
     },
 
     timeRemaining () {
-      let payTime = new Date().getTime() + 15 * 60 * 1000
+      let payTime = 0
+      if (this.orderTime) {
+        payTime = this.orderTime
+      } else {
+        payTime = new Date().getTime() + 10 * 60 * 1000
+        // 需要保存倒计时，但是还缺订单号
+      }
       let timer = setInterval(() => {
         let nowTime = new Date().getTime()
         let MS = payTime - nowTime
         let minute = parseInt(MS / (1000 * 60))
         let second = parseInt(MS % (1000 * 60) / 1000)
-        this.time = `${minute > 10 ? minute : '0' + minute}分钟 ${second > 10 ? second : '0' + second}秒`
-        // 判断事件到了后的事件
-      })
+        this.time = `${minute >= 10 ? minute : '0' + minute} 分钟 ${second >= 10 ? second : '0' + second} 秒`
+        if (MS <= 0) {
+          clearInterval(timer)
+          this.overtime = true
+        }
+      }, 1000)
     }
   }
 }
@@ -127,6 +146,23 @@ export default {
     left: 0;
     background-color: #fff;
     .payTypeContainer {
+      .overtime {
+        font-size: .16rem;
+        color: #c72c2c;
+        padding: .15rem;
+      }
+      .countDown {
+        padding: .15rem;
+        display: flex;
+        h3 {
+          font-size: .16rem;
+          color: #444;
+        }
+        .time {
+          font-size: .15rem;
+          color: #24a6b8;
+        }
+      }
       .payTypeUl {
         .payTypeLi {
           font-size: .25rem;

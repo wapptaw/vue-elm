@@ -35,7 +35,8 @@ const state = {
     selected: true,
     needTitle: false
   }, // 发票类型
-  payAmount: 0 // 支付的钱数
+  orderData: '', // 订单信息
+  orderTime: '' // 下单时间
 }
 
 export default new Vuex.Store({

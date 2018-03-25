@@ -71,7 +71,7 @@ export default {
     state.invoiceType = invoiceType
   },
 
-  payAmountSave (state, payAmount) { // 需要支付的钱数
-    state.payAmount = payAmount
+  payAmountSave (state, orderData) { // 需要支付的钱数
+    state.orderData = orderData
   }
 }

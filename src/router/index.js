@@ -23,6 +23,7 @@ import addressNearby from '../page/deliveryAddress/chilren/addressNearby'
 import remark from '../page/formPay/children/remark'
 import invoice from '../page/formPay/children/invoice'
 import payPage from '../page/formPay/children/payPage'
+import orderFormDetail from '../page/Home/children/children/orderFormDetail'
 Vue.use(Router)
 
 export default new Router({
@@ -49,7 +50,14 @@ export default new Router({
         {
           path: 'OrderForm',
           name: 'orderForm',
-          component: OrderForm
+          component: OrderForm,
+          children: [
+            {
+              path: 'orderFormDetail',
+              name: 'orderFormDetail',
+              component: orderFormDetail
+            }
+          ]
         },
         {
           path: 'user',

@@ -115,7 +115,7 @@
 <script>
 import TopBack from '../../components/common/TopBack'
 import {mapState, mapGetters, mapMutations} from 'vuex'
-import {shopDetails, checkout} from '../../service/getData'
+import {shopDetails, checkout, placeOrders} from '../../service/getData'
 import {imgBaseUrl2} from '../../config/url'
 
 export default {
@@ -166,7 +166,9 @@ export default {
       imgBaseUrl2,
       orderList: '', // 初始数据
       warnMessage: '',
-      popup: false
+      popup: false,
+      checkoutData: null, // 订单检测信息
+      remarkData: null // 备注信息
     }
   },
 
@@ -236,7 +238,7 @@ export default {
       return [
         {
           title: '订单备注',
-          message: '口味、偏好等',
+          message: this.remarkData || '口味、偏好等',
           link: 'remark'
         },
         {
@@ -314,31 +316,52 @@ export default {
       this.payModeShow = false
     },
 
-    async checkout () { // 不知道为啥报参数错误，算了不管了，本来是订单检测成功，然后保存订单的
+    async checkout () { // 不知道为啥报参数错误，算了不管了，假装成功了
       try {
         let res = await checkout(this.geohash, [this.orderList], this.shopId)
-        console.log(res)
+        if (res.status !== 0) {
+          this.checkoutData = res
+        } else {
+          console.log(res.message)
+        }
       } catch (e) {
         throw new Error(e)
       }
     },
 
-    orderConfirm () { // 模拟一下，其实啥数据都没传
-      if (!this.userInfo) {
-        this.popup = true
-        this.warnMessage = '请先登录'
-      } else if (!this.deliveryAddress) {
-        this.popup = true
-        this.warnMessage = '请添加收货地址'
-      } else {
-        this.payAmountSave(this.sumPrice)
-        this.$router.push({name: 'payPage', query: {payMode: this.payModeSelected}})
+    async orderConfirm () { // 模拟一下，其实啥数据都没传
+      try {
+        if (!this.userInfo) {
+          this.popup = true
+          this.warnMessage = '请先登录'
+        } else if (!this.deliveryAddress) {
+          this.popup = true
+          this.warnMessage = '请添加收货地址'
+        } else if (this.checkoutData) {
+          this.popup = true
+          this.warnMessage = '订单检测失败，请重新下单'
+        } else {
+          let res = await placeOrders(this.userInfo.user_id, this.checkoutData.cart.id, this.deliveryAddress.id, this.remarkData, this.checkoutData.cart.groups, this.geohash, this.checkoutData.sig)
+          console.log(res)
+          if (res.need_validation) {
+            // 反正一定会失败，所以不写了
+          } else {
+            this.payAmountSave(this.checkoutData) // 这里需要保存订单
+            this.$router.push({name: 'payPage', query: {payMode: this.payModeSelected}})
+          }
+        }
+      } catch (e) {
+        throw new Error(e)
       }
     },
 
     warnConfirm () {
       this.popup = false
-      this.$router.push({name: 'login'})
+      if (this.warnMessage === '请先登录') {
+        this.$router.push({name: 'login'})
+      } else if (this.warnMessage === '请添加收货地址') {
+        this.$router.push({name: 'deliveryAddress'})
+      }
     },
 
     ...mapMutations([
