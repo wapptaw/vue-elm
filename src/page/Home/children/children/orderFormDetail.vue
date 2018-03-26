@@ -1,14 +1,18 @@
 <template>
   <div class="orderFormDetail">
-    <top-back title="订单详情"></top-back>
-    <section class="orderContent">
+    <top-back title="订单详情" ref="topBack"></top-back>
+    <section class="orderContent" :style="{height: `${orderContentHeight}px`}">
       <section class="payoutStatus">
         <div class="shopIcon">
           <img :src="`${imgBaseUrl2}${orderFormDetailData && orderFormDetailData._doc.restaurant_image_url}`">
         </div>
         <p class="status">{{orderFormDetailData && orderFormDetailData._doc.status_bar.title}}</p>
         <div class="againContainer">
-          <span class="again">再来一单</span>
+          <router-link
+            tag="span"
+            class="again"
+            event="touchend"
+            :to="{name: 'order', params: {id: orderFormDetailData && orderFormDetailData._doc.restaurant_id}}">再来一单</router-link>
         </div>
       </section>
       <section class="orderFormList">
@@ -35,11 +39,14 @@
       </section>
       <section class="delivery">
         <h4>配送信息</h4>
-        <p class="deliveryTime">送达时间：{{orderFormDetailData.deliver_time}}</p>
-        <p class="address">
-          <span class="addressDetail">送货地址：{{orderFormDetailData.addressDetail}}</span>
-          <span class="phone">{{orderFormDetailData.phone}}</span>
-        </p>
+        <p class="deliveryTime">送达时间：{{orderFormDetailData && orderFormDetailData.deliver_time}}</p>
+        <section class="address">
+          <h5>送货地址：</h5>
+          <div class="deliveryDetail">
+            <p class="addressDetail">{{orderFormDetailData && orderFormDetailData.addressDetail}}</p>
+            <p class="phone">{{orderFormDetailData && orderFormDetailData.phone}}</p>
+          </div>
+        </section>
       </section>
     </section>
   </div>
@@ -68,12 +75,13 @@ export default {
   data () {
     return {
       orderFormDetailData: null,
-      imgBaseUrl2
+      imgBaseUrl2,
+      orderContentHeight: 'auto'
     }
   },
 
   computed: {
-    foodList () {
+    foodList () { // 订单列表
       let foodList = []
       if (this.orderFormDetailData) {
         let deliverFee = {
@@ -101,7 +109,7 @@ export default {
       return foodList
     },
 
-    sumPrice () {
+    sumPrice () { // 总价
       let sumPrice = 0
       for (let item of this.foodList) {
         if (item.quantity) {
@@ -114,23 +122,28 @@ export default {
     },
 
     ...mapState([
-      'userInfo'
+      'userInfo',
+      'clientHeight'
     ])
   },
 
-  mounted() {
+  mounted () {
     this.orderFormDetailDataGet()
+    this.orderContentGet()
   },
 
   methods: {
-    async orderFormDetailDataGet () {
+    async orderFormDetailDataGet () { // 订单详情
       try {
         let res = await orderDetailGet(this.userInfo.user_id, this.orderId)
-        console.log(res)
         this.orderFormDetailData = res
       } catch (e) {
         throw new Error(e)
       }
+    },
+
+    orderContentGet () { // 获取orderContent的高度
+      this.orderContentHeight = this.clientHeight - this.$refs.topBack.$el.offsetHeight
     }
   }
 }
@@ -145,10 +158,12 @@ export default {
     top: 0;
     background-color: #fff;
     .orderContent {
+      overflow: auto;
       .payoutStatus {
         .shopIcon {
           width: 20%;
           margin: 0 auto;
+          padding-top: .15rem;
           img {
             width: 100%;
             border-radius: 50%;
@@ -160,10 +175,12 @@ export default {
           font-weight: bold;
           color: #3f3f3f;
           text-align: center;
+          line-height: .4rem;
         }
         .againContainer {
           display: flex;
           justify-content: center;
+          margin: .1rem 0 .15rem 0;
           .again {
             border: 1px solid #1f9dc4;
             color: #1f9dc4;
@@ -175,16 +192,18 @@ export default {
       }
       .orderFormList {
         padding: 0 .1rem;
+        border-top: .1rem solid #e4e4e4;
+        border-bottom: .1rem solid #e4e4e4;
         .orderFormDl {
           .orderDt {
             display: flex;
             justify-content: space-between;
+            height: .4rem;
             .shopName {
               display: flex;
               align-items: center;
               img {
                 width: 10%;
-                height: 100%;
               }
               h3 {
                 font-size: .16rem;
@@ -196,11 +215,15 @@ export default {
             .arrows {
               color: #747474;
               transform: scale(1, 2);
+              display: flex;
+              align-items: center;
             }
           }
           .orderFormDd {
             display: flex;
             justify-content: space-between;
+            height: .4rem;
+            align-items: center;
             .foodName {
               font-size: .14rem;
               color: #636363;
@@ -223,25 +246,43 @@ export default {
         .sumPrice {
           display: flex;
           justify-content: flex-end;
+          align-items: center;
           color: #e29727;
           font-size: .13rem;
           font-weight: bold;
+          height: .4rem;
         }
       }
       .delivery {
+        padding: 0 .1rem;
+        padding-bottom: .2rem;
         h4 {
           font-size: .16rem;
           color: #464646;
+          line-height: .5rem;
         }
         .deliveryTime {
           font-size: .14rem;
           color: #535353;
+          line-height: .5rem;
         }
         .address {
-          font-size: .14rem;
-          color: #535353;
-          span {
-            //
+          display: flex;
+          h5 {
+            font-size: .14rem;
+            color: #535353;
+            line-height: .4rem;
+          }
+          .deliveryDetail {
+            .addressDetail {
+              font-size: .14rem;
+              color: #535353;
+              line-height: .4rem;
+            }
+            .phone {
+              font-size: .14rem;
+              color: #535353;
+            }
           }
         }
       }

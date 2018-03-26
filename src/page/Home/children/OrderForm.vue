@@ -26,12 +26,19 @@
             </section>
             <footer class="overtime">
               <span v-if="item.interval > 0" class="countDown">剩余支付时间：{{item.remainingTime}}</span>
-              <span v-else class="again">再来一单</span>
+              <router-link
+                v-else
+                tag="span"
+                class="again"
+                event="touchend"
+                :to="{name: 'order', params: {id: item.restaurant_id}}">再来一单</router-link>
             </footer>
           </section>
         </router-link>
       </ul>
     </section>
+    <matte-opacity v-if="!userInfo"></matte-opacity>
+    <pop-up v-if="!userInfo" warnMessage="请先登录" @warnConfirm="linkLogin"></pop-up>
     <transition name="right-slide-transform">
       <router-view></router-view>
     </transition>
@@ -48,7 +55,9 @@ export default {
   name: 'OrderForm',
 
   components: {
-    TopBack
+    TopBack,
+    MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
+    PopUp: async () => import('../../../components/common/PopUp')
   },
 
   filters: {
@@ -96,6 +105,7 @@ export default {
   methods: {
     async orderList () { // 订单列表获取
       try {
+        if (!this.userInfo) return
         let res = await orderListGet(this.userInfo.user_id, this.offset)
         res.forEach((item) => {
           item.interval = new Date(item.formatted_created_at).getTime() + 15 * 60 * 1000 - new Date().getTime()
@@ -124,6 +134,10 @@ export default {
 
     orderFormHeightGet () { // 计算高度
       this.orderFormHeight = this.clientHeight - this.btmNavH - this.$refs.topBack.$el.offsetHeight
+    },
+
+    linkLogin () {
+      this.$router.push({name: 'login'})
     }
   }
 }

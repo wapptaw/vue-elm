@@ -53,7 +53,7 @@ export default {
   },
 
   watch: {
-    routerName (newV) {
+    routerName (newV) { // 切换到没有导航的页面后，导航状态为保存，考虑把状态保存到全局
       for (let v of this.navData) {
         if (v.routerName === newV) {
           v.selected = true

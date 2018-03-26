@@ -28,7 +28,8 @@ export default {
   methods: {
     async remarkDataGet () {
       try {
-        let res = getRemark () // 缺参数
+        let res = getRemark() // 缺参数
+        this.remarkData = res
       } catch (e) {
         throw new Error(e)
       }
