@@ -48,15 +48,7 @@
             </div>
           </v-touch>
         </dl>
-        <transition name="fullScreenFade">
-          <v-touch
-            tag="div"
-            class="fullScreen"
-            v-if="shadowShow"
-            @tap="shadowClose"
-            :style="{zIndex: tier}">
-          </v-touch>
-        </transition>
+        <matte-opacity v-if="shadowShow" @tapScreen="shadowClose" :zIndex="tier"></matte-opacity>
         <section v-if="specShow" class="specSelect">
           <h3 class="specTitle">规格</h3>
           <ul class="specs">
@@ -125,6 +117,10 @@ import {mapState, mapMutations} from 'vuex'
 export default {
   name: 'order',
 
+  components: {
+    MatteOpacity: async () => import('../../../components/common/MatteOpacity')
+  },
+
   props: {
     id: {
       type: [String, Number],
@@ -143,7 +139,7 @@ export default {
       shadowShow: false,
       specMark: 0, // 记录选中的spec选项的序号
       carListShow: false,
-      tier: 99 // 阴影层级
+      tier: 99 // 遮罩层级
     }
   },
 

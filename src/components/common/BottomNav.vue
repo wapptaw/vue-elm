@@ -5,7 +5,8 @@
         v-for="item in navData"
         :key="item.name"
         tag="div"
-        :class="{selected: item.selected}"
+        :class="{selected: routerName === item.routerName}"
+        class="foodItem"
         :to="{name: item.routerName}">
         {{item.name}}
       </router-link>
@@ -24,23 +25,19 @@ export default {
       navData: [
         {
           name: '外卖',
-          routerName: 'takeOut',
-          selected: true
+          routerName: 'takeOut'
         },
         {
           name: '搜索',
-          routerName: 'shopSearch',
-          selected: false
+          routerName: 'shopSearch'
         },
         {
           name: '订单',
-          routerName: 'orderForm',
-          selected: false
+          routerName: 'orderForm'
         },
         {
           name: '我的',
-          routerName: 'user',
-          selected: false
+          routerName: 'user'
         }
       ]
     }
@@ -52,20 +49,8 @@ export default {
     }
   },
 
-  watch: {
-    routerName (newV) { // 切换到没有导航的页面后，导航状态为保存，考虑把状态保存到全局
-      for (let v of this.navData) {
-        if (v.routerName === newV) {
-          v.selected = true
-        } else {
-          v.selected = false
-        }
-      }
-    }
-  },
-
   mounted () {
-    this.$emit('heightGet', 55)
+    this.$emit('heightGet', 50)
   },
 
   methods: {
@@ -82,10 +67,23 @@ export default {
     justify-content: space-around;
     align-items: center;
     width: 100%;
-    background-color: #d3d3d3;
-    height: .55rem;
+    background-color: #e0e0e0;
+    height: .5rem;
+    .foodItem {
+      font-size: .12rem;
+      color: #3f3f3f;
+      width: .35rem;
+      height: .35rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #4cdfd7;
+      background-color: #fff;
+      border-radius: .2rem;
+    }
     .selected {
       color: #175cb6;
+      font-weight: bold;
     }
   }
 </style>

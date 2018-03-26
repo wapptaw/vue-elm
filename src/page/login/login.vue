@@ -255,6 +255,7 @@ export default {
         input {
           font-size: .15rem;
           color: #4d4d4d;
+          width: 100%;
         }
         .loginByphoneNumContainer {
           width: 100%;
@@ -268,6 +269,9 @@ export default {
           .codeGet {
             font-size: .15rem;
             color: #2e67cf;
+            width: 40%;
+            display: flex;
+            justify-content: flex-end;
           }
         }
         

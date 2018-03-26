@@ -1,7 +1,9 @@
 <template>
   <div>
     <section :style="{height: homeMainH, overflowY: 'hidden'}" class="homeMain">
-      <router-view :btmNavH="btmNavH"></router-view>
+      <transition name="fade" mode="out-in">
+        <router-view :btmNavH="btmNavH"></router-view>
+      </transition>
     </section>
     <BottomNav @heightGet="btmNavHGet"></BottomNav>
   </div>

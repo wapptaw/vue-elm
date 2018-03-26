@@ -1,8 +1,10 @@
 <template>
   <transition name="fade">
-    <div
+    <v-touch
+      tag="div"
       class="matte"
-      :style="{zIndex: zIndex}"></div>
+      :style="{zIndex: zIndex}"
+      @tap="tapScreen"></v-touch>
   </transition>
 </template>
 
@@ -14,6 +16,12 @@ export default {
     zIndex: {
       type: [String, Number],
       default: 'auto'
+    }
+  },
+
+  methods: {
+    tapScreen () {
+      this.$emit('tapScreen')
     }
   }
 }

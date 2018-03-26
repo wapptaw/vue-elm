@@ -49,6 +49,7 @@ export default { // 返回栏
     background-color: #0f96e4;
     text-align: center;
     position: relative;
+    color: #fff;
     .btn {
       position: absolute;
       top: 0;

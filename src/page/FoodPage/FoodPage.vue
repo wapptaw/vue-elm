@@ -3,7 +3,7 @@
     <header class="details" :style="detailsStyle">
       <img :src="`${this.imgBaseUrl2}${this.shopDetailsData && this.shopDetailsData.image_path}`" class="headerBg">
       <div class="headerContent" ref="headerContent">
-        <v-touch tag="span" class="back" @tap="goBack">返回</v-touch>
+        <v-touch tag="span" class="back" @tap="goBack">&lt;</v-touch>
         <div class="icon">
           <img :src="`${imgBaseUrl2}${shopDetailsData.image_path}`" alt="">
         </div>
@@ -37,11 +37,11 @@
           <span :class="{selected: item.selected}">{{item.title}}</span>
         </router-link>
       </ul>
-      <router-view></router-view>
+      <transition name="fade" mode="out-in">
+        <router-view></router-view>
+      </transition>
     </div>
-    <transition name="fullScreenFade">
-      <v-touch tag="div" class="fullScreen" v-if="actives" @tap="activeClose"></v-touch>
-    </transition>
+    <matte-opacity v-if="actives" @tapScreen="activeClose"></matte-opacity>
     <transition name="slide">
       <div class="activesAll" v-if="actives">
         <h2 class="title">优惠活动</h2>
@@ -71,7 +71,8 @@ export default {
   name: 'FoodPage',
 
   components: {
-    TopBack: async () => import('../../components/common/TopBack')
+    TopBack: async () => import('../../components/common/TopBack'),
+    MatteOpacity: async () => import('../../components/common/MatteOpacity')
   },
 
   props: {
@@ -181,15 +182,6 @@ export default {
       color: #56abfa;
     }
   }
-  .fullScreenFade-enter, .fullScreenFade-leave-to {
-    opacity: 0;
-  }
-  .fullScreenFade-enter-active, .fullScreenFade-leave-active {
-    transition: opacity .2s ease-out;
-  }
-  .fullScreenFade-leave, .fullScreenFade-enter-to {
-    opacity: 1;
-  }
 
   .details {
     width: 100%;
@@ -209,11 +201,11 @@ export default {
       box-sizing: border-box;
       .back {
         position: fixed;
-        left: .05rem;
+        left: 0;
         top: 0;
-        color: #fff;
-        font-size: .2rem;
-
+        color: rgba(255, 255, 255, 0.6);
+        font-size: .25rem;
+        transform: scale(1, 2);
       }
       .icon {
         width: 20%;

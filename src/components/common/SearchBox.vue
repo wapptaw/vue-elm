@@ -67,16 +67,16 @@ export default {
       height: .4rem;
       line-height: .4rem;
       font-size: .15rem;
-      color: #1f1f1f;
       box-sizing: border-box;
       vertical-align: middle;
     }
     .searchVal {
-      border: 1px solid #1f1f1f;
+      border: 1px solid #646464;
       text-indent: .1rem;
       width: 80%;
-      border-radius: .05rem;
-      background-color: #e9e9e9;
+      border-radius: 3px;
+      background-color: #fff;
+      color: #363636;
     }
     .searchBox {
       width: 18%;

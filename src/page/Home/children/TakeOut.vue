@@ -24,7 +24,7 @@
         </router-link>
         <div class="weather">
           <span>{{ weather.cond_txt }}</span>
-          <span>{{ weather.temp }}</span>
+          <span>{{ weather.temp }}℃</span>
         </div>
       </header>
       <div
@@ -86,6 +86,7 @@
     <prompt-box :boxStyle="loadStyle">
       <span>{{loadContent}}</span>
     </prompt-box>
+    <loading></loading>
   </scroll>
 </template>
 
@@ -100,7 +101,8 @@ export default {
   components: {
     ShopList: async () => import('../../../components/common/ShopList'), // 异步加载组件
     scroll: async () => import('../../../components/common/scroll'),
-    PromptBox: async () => import('../../../components/common/PromptBox')
+    PromptBox: async () => import('../../../components/common/PromptBox'),
+    loading: async () => import('../../../components/common/loading')
   },
 
   data () {
@@ -284,7 +286,7 @@ export default {
             top: 'auto',
             height: `${scroll.maxScrollY - scroll.y}px`
           }
-          this.loadContent = '加载中'
+          this.loadContent = '没有了...'
         } else {
           this.loadStyle.height = 0
         }
@@ -322,7 +324,7 @@ export default {
       }
     },
 
-    async pullDownRefresh (scroll) {
+    async pullDownRefresh (scroll) { // 下拉刷新
       try {
         this.shopListData = []
         this.offset = 0
@@ -333,7 +335,7 @@ export default {
       }
     },
 
-    async pullUpLoad (scroll) {
+    async pullUpLoad (scroll) { // 上拉加载
       try {
         if (!this.shopListLimit) {
           this.offset += 20
@@ -362,30 +364,31 @@ export default {
   .header {
     width: 100%;
     height: .4rem;
-    padding: 0 2%;
+    padding: 0 .1rem;
     box-sizing: border-box;
     background-color: #0f96e4;
     font-size: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     .geolocation {
-      float: left;
-      width: 70%;
       span {
         display: inline-block;
-        width: 100%;
+        width: 70vw;
         font-size: .16rem;
-        line-height: .4rem;
-        color: #1f1f1f;
+        color: #dfdfdf;
         text-overflow: ellipsis;
         overflow-x: hidden;
         white-space: nowrap;
       }
     }
     .weather {
-      float: right;
       span {
-        line-height: .4rem;
-        font-size: .16rem;
-        color: #1f1f1f;
+        font-size: .14rem;
+        color: #dfdfdf;
+      }
+      span:last-of-type {
+        margin-left: .1rem;
       }
     }
   }
@@ -416,10 +419,11 @@ export default {
     border: 1px solid rgba(0, 0, 0, 0);
     overflow: hidden;
     background-color: #fff;
+    height: 2rem;
   }
   .foodNav {
     width: 100%;
-    padding: 0 2%;
+    padding: 0 .1rem;
     font-size: 0;
     box-sizing: border-box;
     position: absolute;
@@ -433,16 +437,19 @@ export default {
         width: .6rem
       }
       p {
-        font-size: .16rem;
-        color: #1f1f1f;
+        font-size: .14rem;
+        color: #464646;
+        margin-top: .05rem;
       }
     }
   }
   .mark {
     width: .5rem;
-    margin: .1rem auto;
-    margin-top: 1.7rem;
     font-size: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: .1rem;
     li {
       width: .15rem;
       height: .05rem;
