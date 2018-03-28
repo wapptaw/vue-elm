@@ -86,7 +86,7 @@
     <prompt-box :boxStyle="loadStyle">
       <span>{{loadContent}}</span>
     </prompt-box>
-    <loading></loading>
+    <loading v-if="loading"></loading>
   </scroll>
 </template>
 
@@ -129,7 +129,8 @@ export default {
         bottom: 'auto',
         top: 'auto'
       },
-      footerHeight: ''
+      footerHeight: '',
+      loading: false // 等待动画
     }
   },
 
@@ -306,10 +307,12 @@ export default {
     async shopListGet () { // shopList数据获取
       try {
         if (this.geohash) {
+          this.loading = true
           let res = await shopList(this.latitude, this.longitude, this.offset)
           this.shopListLimit = res.length < 20
           this.shopListData = this.shopListData.concat(res)
           this.shopListDataSave(this.shopListData)
+          this.loading = false
         }
       } catch (e) {
         throw new Error(e)

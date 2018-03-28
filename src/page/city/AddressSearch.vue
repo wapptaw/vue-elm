@@ -46,6 +46,7 @@
         </ul>
       </div>
     </div>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -60,7 +61,8 @@ export default {
 
   components: {
     TopBack,
-    SearchBox
+    SearchBox,
+    loading: async () => import('../../components/common/loading')
   },
 
   data () {
@@ -69,7 +71,8 @@ export default {
       searchHistory: true,
       searchResult: true,
       geohash: '',
-      topContentHeight: ''
+      topContentHeight: '',
+      loading: false
     }
   },
 
@@ -102,6 +105,7 @@ export default {
 
   methods: {
     getSearchData (val) { // 获取搜索地址列表
+      this.loading = true
       searchPlace(this.cityId, val).then(res => {
         this.searchHistory = false
         if (res.length !== 0) {
@@ -111,6 +115,7 @@ export default {
           this.searchResult = true
           this.placeList = []
         }
+        this.loading = false
       })
     },
 
@@ -206,9 +211,8 @@ export default {
         min-height: .2rem;
         line-height: .2rem;
         color: #999;
+        padding: 0 .05rem;
       }
     }
   }
 </style>
-
-

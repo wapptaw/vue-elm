@@ -22,6 +22,7 @@
         <span class="addText">+</span>
       </router-link>
     </section>
+    <loading v-if="loading"></loading>
     <router-view></router-view>
   </div>
 </template>
@@ -35,12 +36,15 @@ export default {
   name: 'deliveryAddress',
 
   components: {
-    TopBack
+    TopBack,
+    loading: async () => import('../../components/common/loading')
   },
 
   data () {
     return {
-      addressList: '' // 地址列表
+      addressList: '', // 地址列表
+      loading: false,
+      confirmSelect: false
     }
   },
 
@@ -54,19 +58,33 @@ export default {
     this.addressListGet()
   },
 
+  beforeRouteEnter (to, from, next) {
+    if (from.name === 'orderConfirm') {
+      next(vm => {
+        vm.confirmSelect = true
+      })
+    } else {
+      next()
+    }
+  },
+
   methods: {
-    async addressListGet () { // api不太好用，所以这一页就不写了，以后再说
+    async addressListGet () { // api不太好用，所以这一页就这样了，以后再说
       try {
+        this.loading = true
         let res = await getAddressList(this.userInfo.user_id)
         this.addressList = res
+        this.loading = false
       } catch (e) {
         throw new Error(e)
       }
     },
 
     addressSelect (item) {
-      this.addressSelectSave(item)
-      this.$router.go(-1)
+      if (this.confirmSelect) {
+        this.addressSelectSave(item)
+        this.$router.go(-1)
+      }
     },
 
     ...mapMutations([

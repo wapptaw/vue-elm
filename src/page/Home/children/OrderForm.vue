@@ -42,6 +42,7 @@
     <transition name="right-slide-transform">
       <router-view></router-view>
     </transition>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -57,7 +58,8 @@ export default {
   components: {
     TopBack,
     MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
-    PopUp: async () => import('../../../components/common/PopUp')
+    PopUp: async () => import('../../../components/common/PopUp'),
+    loading: async () => import('../../../components/common/loading')
   },
 
   filters: {
@@ -86,7 +88,8 @@ export default {
       offset: 0,
       orderListData: '',
       imgBaseUrl2,
-      orderFormHeight: 0
+      orderFormHeight: 0,
+      loading: false
     }
   },
 
@@ -106,6 +109,7 @@ export default {
     async orderList () { // 订单列表获取
       try {
         if (!this.userInfo) return
+        this.loading = true
         let res = await orderListGet(this.userInfo.user_id, this.offset)
         res.forEach((item) => {
           item.interval = new Date(item.formatted_created_at).getTime() + 15 * 60 * 1000 - new Date().getTime()
@@ -113,6 +117,7 @@ export default {
           this.countDown(item)
         })
         this.orderListData = res
+        this.loading = false
       } catch (e) {
         throw new Error(e)
       }

@@ -12,18 +12,21 @@
             tag="span"
             class="again"
             event="touchend"
-            :to="{name: 'order', params: {id: orderFormDetailData && orderFormDetailData._doc.restaurant_id}}">再来一单</router-link>
+            :to="{name: 'order', params: {id: `${orderFormDetailData && orderFormDetailData._doc.restaurant_id}`}}">再来一单</router-link>
         </div>
       </section>
       <section class="orderFormList">
         <dl class="orderFormDl">
-          <dt class="orderDt">
+          <router-link
+            tag="dt"
+            class="orderDt"
+            :to="{name: 'order', params: {id: `${orderFormDetailData && orderFormDetailData._doc.restaurant_id}`}}">
             <section class="shopName">
               <img :src="`${imgBaseUrl2}${orderFormDetailData && orderFormDetailData._doc.restaurant_image_url}`">
               <h3>{{orderFormDetailData && orderFormDetailData._doc.restaurant_name}}</h3>
             </section>
             <span class="arrows">&gt;</span>
-          </dt>
+          </router-link>
           <dd
             v-for="item in foodList"
             :key="item.name"
@@ -68,7 +71,7 @@ export default {
   props: {
     orderId: {
       type: [String, Number],
-      default: ''
+      default: 0
     }
   },
 

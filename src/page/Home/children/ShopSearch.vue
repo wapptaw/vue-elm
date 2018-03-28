@@ -28,12 +28,14 @@
         @tap="clearHistory">清空搜索记录</v-touch>
     </section>
     <scroll
-      v-else
+      v-else-if="foodSearchList.length > 0"
       :click="true"
       :bounce="false"
       :style="{height: scrollHeight, overflow: 'hidden'}">
       <ShopList :shopListData="foodSearchList"></ShopList>
     </scroll>
+    <div v-else class="noSearchResult">没有搜索结果</div>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -48,7 +50,8 @@ export default {
     TopBack: async () => import('../../../components/common/TopBack'),
     SearchBox: async () => import('../../../components/common/SearchBox'),
     ShopList: async () => import('../../../components/common/ShopList'),
-    scroll: async () => import('../../../components/common/scroll')
+    scroll: async () => import('../../../components/common/scroll'),
+    loading: async () => import('../../../components/common/loading')
   },
 
   props: {
@@ -63,7 +66,8 @@ export default {
       foodSearchList: [],
       topBackHeight: 0,
       searchBoxHeight: 0,
-      searchHistoryShow: true
+      searchHistoryShow: true,
+      loading: false
     }
   },
 
@@ -98,7 +102,9 @@ export default {
       try {
         let res
         if (val) {
+          this.loading = true
           res = await searchRestaurant(this.geohash, val)
+          this.loading = false
         } else {
           res = []
         }
@@ -165,5 +171,10 @@ export default {
     text-align: center;
     background-color: #fff;
   }
+}
+.noSearchResult {
+  color: #535353;
+  font-size: .14rem;
+  margin-left: .1rem;
 }
 </style>

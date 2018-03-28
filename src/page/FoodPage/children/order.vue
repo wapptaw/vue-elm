@@ -39,38 +39,48 @@
               <footer class="foodFooter">
                 <span class="price">￥{{food && food.specfoods[0].price}}</span>
                 <section class="specifications">
-                  <v-touch tag="span" class="foodReduce" v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" @tap="foodReduce(index, foodIndex, food.specfoods[0].price)">-</v-touch>
-                  <span v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" class="foodSize">{{food.specfoods[0].selectedNum}}</span>
-                  <v-touch tag="span" class="foodSelect" v-if="food.specfoods.length > 1" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
-                  <v-touch tag="span" class="foodAdd" v-else @tap="foodAdd(index, foodIndex, food.specfoods[0].price)">+</v-touch>
+                  <transition name="fade">
+                    <v-touch v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" tag="span" class="foodReduce" @tap="foodReduce(index, foodIndex, food.specfoods[0].price)">-</v-touch>
+                  </transition>
+                  <transition name="fade">
+                    <span v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" class="foodSize">{{food.specfoods[0].selectedNum}}</span>
+                  </transition>
+                  <v-touch v-if="food.specfoods.length > 1" tag="span" class="foodSelect" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
+                  <v-touch v-else tag="span" class="foodAdd" @tap="foodAdd(index, foodIndex, $event)">+</v-touch>
                 </section>
               </footer>
             </div>
           </v-touch>
         </dl>
-        <matte-opacity v-if="shadowShow" @tapScreen="shadowClose" :zIndex="tier"></matte-opacity>
-        <section v-if="specShow" class="specSelect">
-          <h3 class="specTitle">规格</h3>
-          <ul class="specs">
-            <v-touch
-              tag="li"
-              v-for="(spec, specIndex) in specData"
-              :key="spec.food_id"
-              @tap="specSelect(specIndex)"
-              :class="{setStyle: spec.selected}"
-              class="spec">
-              {{spec.specs_name}}
-            </v-touch>
-          </ul>
-          <footer class="specFooter">
-            <span class="specPrice">￥{{specData[specMark].price}}</span>
-            <section class="specCount">
-              <v-touch tag="span" class="specReduce" v-if="specData[specMark].selectedNum > 0" @tap="foodReduce">-</v-touch>
-              <span class="specNum" v-if="specData[specMark].selectedNum > 0">{{specData[specMark].selectedNum}}</span>
-              <v-touch tag="span" class="specAdd" @tap="foodAdd">+</v-touch>
-            </section>
-          </footer>
-        </section>
+        <matte-opacity v-if="shadowShow || popup" @tapScreen="shadowClose" :zIndex="tier"></matte-opacity>
+        <transition name="fade">
+          <section v-if="specShow" class="specSelect">
+            <h3 class="specTitle">规格</h3>
+            <ul class="specs">
+              <v-touch
+                tag="li"
+                v-for="(spec, specIndex) in specData"
+                :key="spec.food_id"
+                @tap="specSelect(specIndex)"
+                :class="{setStyle: spec.selected}"
+                class="spec">
+                {{spec.specs_name}}
+              </v-touch>
+            </ul>
+            <footer class="specFooter">
+              <span class="specPrice">￥{{specData[specMark].price}}</span>
+              <section class="specCount">
+                <transition name="fade">
+                  <v-touch v-if="specData[specMark].selectedNum > 0" tag="span" class="specReduce" @tap="foodReduce">-</v-touch>
+                </transition>
+                <transition name="fade">
+                  <span v-if="specData[specMark].selectedNum > 0" class="specNum">{{specData[specMark].selectedNum}}</span>
+                </transition>
+                <v-touch tag="span" class="specAdd" @tap="foodAdd">+</v-touch>
+              </section>
+            </footer>
+          </section>
+        </transition>
       </section>
     </div>
     <transition name="slide">
@@ -96,16 +106,20 @@
       </section>
     </transition>
     <footer class="cartView" ref="cartView">
-      <v-touch tag="span" class="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
+      <v-touch tag="span" class="foodNum" ref="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
       <span class="totalPrices">￥{{sum.totalPrices}}</span>
       <router-link
+        v-if="sum.totalPrices >= 20"
         :to="{path: `/orderConfirm/${id}`}"
         tag="span"
         event="touchend"
         class="pay">
         付款
       </router-link>
+      <span v-else class="pay" :class="{minPay: sum.totalPrices < 20}">还差{{minDelivery}}元起送</span>
     </footer>
+    <pop-up v-if="popup" warnMessage="请先登录" @warnConfirm="warnConfirm" class="popup"></pop-up>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -118,7 +132,9 @@ export default {
   name: 'order',
 
   components: {
-    MatteOpacity: async () => import('../../../components/common/MatteOpacity')
+    MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
+    PopUp: async () => import('../../../components/common/PopUp'),
+    loading: async () => import('../../../components/common/loading')
   },
 
   props: {
@@ -139,7 +155,10 @@ export default {
       shadowShow: false,
       specMark: 0, // 记录选中的spec选项的序号
       carListShow: false,
-      tier: 99 // 遮罩层级
+      tier: 99, // 遮罩层级
+      popup: false,
+      loading: false,
+      endPos: '' // 终点坐标
     }
   },
 
@@ -200,16 +219,23 @@ export default {
       }
     },
 
+    minDelivery () {
+      if (this.sum.totalPrices < 20) {
+        return 20 - this.sum.totalPrices
+      }
+    },
+
     ...mapState([
       'detailsHeight',
       'clientHeight',
-      'foodMenu'
+      'foodMenu',
+      'userInfo'
     ])
   },
 
   watch: {
     allFoods (newV) {
-      if (newV.length === 0) {
+      if (newV.length === 0 && !this.specShow) {
         this.shadowShow = false
         this.carListShow = false
       }
@@ -221,16 +247,21 @@ export default {
     this.$nextTick(() => {
       this.footerHeight = this.$refs.cartView.offsetHeight
     })
+    this.endPosGet()
   },
 
   beforeRouteLeave (to, from, next) {
     this.foodMenuDataSave({
       foodMenuData: this.foodMenuData,
-      shopId: this.id})
-    if (to.name === 'orderConfirm') {
-      // 需要验证用户所以user页面写完再说
+      shopId: this.id
+    })
+    if (to.name === 'orderConfirm' && !this.userInfo) {
+      this.tier = 101
+      this.popup = true
+      next(false)
+    } else {
+      next()
     }
-    next()
   },
 
   methods: {
@@ -239,6 +270,7 @@ export default {
         if (this.foodMenu[this.id]) {
           this.foodMenuData = this.foodMenu[this.id]
         } else {
+          this.loading = true
           let res = await foodMenu(this.id)
           for (let val of res) {
             for (let food of val.foods) {
@@ -250,6 +282,7 @@ export default {
           }
           res[0].menuSelected = true
           this.foodMenuData = res
+          this.loading = false
         }
       } catch (e) {
         throw new Error(e)
@@ -267,7 +300,7 @@ export default {
       document.getElementById(index).scrollIntoView()
     },
 
-    foodAdd (index, foodIndex) {
+    foodAdd (index, foodIndex, $event) {
       let specfoods
       if (this.specData) {
         specfoods = this.specData
@@ -275,6 +308,7 @@ export default {
         specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
       }
       specfoods[this.specMark].selectedNum ++
+      console.log($event.center) // 顶点坐标
     },
 
     foodReduce (index, foodIndex) {
@@ -347,6 +381,25 @@ export default {
       }
     },
 
+    warnConfirm () {
+      this.popup = false
+      this.$router.push({name: 'login'})
+    },
+
+    shopAddAnimation () {
+      //
+    },
+
+    endPosGet () {
+      // let endPos = {}
+      // let x = this.$refs.foodNum.clientX
+      // let y = this.$refs.foodNum.clientY
+      // endPos.x = x
+      // endPos.y = y
+      // this.endPos = endPos
+      console.log(this.$refs.foodNum)
+    },
+
     ...mapMutations([
       'foodMenuDataSave'
     ])
@@ -392,24 +445,6 @@ export default {
     font-size: .16rem;
     color: #e9451b;
     font-weight: bold;
-  }
-  .fullScreenFade-enter, .fullScreenFade-leave-to {
-    opacity: 0;
-  }
-  .fullScreenFade-enter-active, .fullScreenFade-leave-active {
-    transition: opacity .2s ease-out;
-  }
-  .fullScreenFade-leave, .fullScreenFade-enter-to {
-    opacity: 1;
-  }
-  
-  .fullScreen {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, .7);
   }
   .foodMenu {
     display: flex;
@@ -621,9 +656,12 @@ export default {
       font-weight: bold;
     }
     .pay {
-      background-color: #d43e3e;
+      background-color: #0ac06b;
       height: 100%;
       color: #fff;
+    }
+    .minPay {
+      background-color: #5ecf8d;
     }
   }
   .car {
@@ -697,6 +735,9 @@ export default {
         }
       }
     }
+  }
+  .popup {
+    z-index: 102;
   }
 </style>
 

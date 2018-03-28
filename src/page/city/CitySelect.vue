@@ -54,6 +54,7 @@
         </div>
       </div>
     </div>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -68,7 +69,8 @@ export default {
 
   components: {
     TopBack,
-    SearchBox
+    SearchBox,
+    loading: async () => import('../../components/common/loading')
   },
 
   data () {
@@ -78,7 +80,8 @@ export default {
       cityGroupKey: [],
       citySearchResult: [],
       citySearchResultAll: true,
-      topContentHeight: ''
+      topContentHeight: '',
+      loading: false
     }
   },
 
@@ -115,6 +118,7 @@ export default {
 
     async groupCityGet () {
       try {
+        this.loading = true
         let res
         // let cityGroupData = sessionStorage.getItem('cityGroup') // 使用sessionStorage保存
         // if (cityGroupData) {
@@ -130,6 +134,7 @@ export default {
           this.cityGroupDataSave(res)
         }
         this.groupCity = res
+        this.loading = false
         let cityGroupKey = Object.keys(this.groupCity)
         let cityGroupKeySort = cityGroupKey.sort()
         let cityGroupKeySortLen = cityGroupKeySort.length

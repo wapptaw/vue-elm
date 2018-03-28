@@ -16,6 +16,7 @@
       </ul>
       <p v-else class="hint">未搜索到任何结果</p>
     </section>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -30,13 +31,15 @@ export default {
 
   components: {
     TopBack,
-    SearchBox
+    SearchBox,
+    loading: async () => import('../../../components/common/loading')
   },
 
   data () {
     return {
       addressNearbyData: '', // 搜索的地址数据
-      addressContainerHeight: '' // 高度
+      addressContainerHeight: '', // 高度
+      loading: false
     }
   },
 
@@ -62,8 +65,10 @@ export default {
 
     async addressInput (key) { // 地址搜索结果
       try {
+        this.loading = true
         let res = await this.addressNearbyDataGet(key)
         this.addressNearbyData = res
+        this.loading = false
       } catch (e) {
         throw new Error(e)
       }

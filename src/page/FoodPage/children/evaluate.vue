@@ -1,85 +1,83 @@
 <template>
-<scroll
-  :style="{height: evaHeight, overflowY: 'hidden'}"
-  :pullUpLoad="true"
-  :watcherData="watcherData"
-  @pullingUp="ratingLoad">
-  <div>
-    <section class="ratingScores">
-      <div class="compareRating">
-        <div class="scores">
-          <span class="score">{{ratingScoresData.overall_score | toFixed}}</span>
-          <h4>综合评价</h4>
+  <scroll
+    :style="{height: evaHeight, overflowY: 'hidden'}"
+    :pullUpLoad="true"
+    :watcherData="watcherData"
+    @pullingUp="ratingLoad">
+    <div>
+      <section class="ratingScores">
+        <div class="compareRating">
+          <div class="scores">
+            <span class="score">{{ratingScoresData.overall_score | toFixed}}</span>
+            <h4>综合评价</h4>
+          </div>
+          <p class="compare">高于周边{{ratingScoresData.compare_rating * 100 | toFixed}}%的商家</p>
         </div>
-        <p class="compare">高于周边{{ratingScoresData.compare_rating * 100 | toFixed}}%的商家</p>
-      </div>
-      <div class="classifyRating">
-        <div class="serviceScore">
-          <h4>服务态度</h4>
-          <span class="star"></span>
-          <span class="score">{{ratingScoresData.service_score | toFixed}}</span>
+        <div class="classifyRating">
+          <div class="serviceScore">
+            <h4>服务态度</h4>
+            <span class="star"></span>
+            <span class="score">{{ratingScoresData.service_score | toFixed}}</span>
+          </div>
+          <div class="foodScore">
+            <h4>菜品评价</h4>
+            <span class="star"></span>
+            <span class="score">{{ratingScoresData.food_score | toFixed}}</span>
+          </div>
+          <div class="deliverTime">
+            <h4>送达时间</h4>
+            <span class="time">{{ratingScoresData.deliver_time}}</span>
+            <span class="timeBasis">分钟</span>
+          </div>
         </div>
-        <div class="foodScore">
-          <h4>菜品评价</h4>
-          <span class="star"></span>
-          <span class="score">{{ratingScoresData.food_score | toFixed}}</span>
-        </div>
-        <div class="deliverTime">
-          <h4>送达时间</h4>
-          <span class="time">{{ratingScoresData.deliver_time}}</span>
-          <span class="timeBasis">分钟</span>
-        </div>
-      </div>
-    </section>
-    <section class="ratingTags">
-      <ul class="ulRatingTags">
-        <v-touch tag="li"
-          v-for="(item, index) in ratingTagsData"
-          :key="item.name"
-          :class="{unsatisfied: item.unsatisfied, selected: item.selected}"
-          class="ratingTag"
-          @tap="tagSelected(index)">
-          {{item.name}}({{item.count}})
-        </v-touch>
-      </ul>
-    </section>
-    <section class="ratingList">
-      <ul class="ulRatingList">
-        <li v-for="(item, index) in getRatingListData" :key="index" class="itemRating">
-          <img v-if="item.avatar" :src="`${imgBaseUrl}${item.avatar}.jpeg`" alt="">
-          <img v-else :src="userAvatarDefault" alt="">
-          <section class="ratingContent">
-            <header class="ratingUser">
-              <section class="userScore">
-                <span class="username">{{item.username}}</span>
-                <section class="score">
-                  <span class="star"></span>
-                  <span class="timeSpent">{{item.time_spent_desc}}</span>
+      </section>
+      <section class="ratingTags">
+        <ul class="ulRatingTags">
+          <v-touch tag="li"
+            v-for="(item, index) in ratingTagsData"
+            :key="item.name"
+            :class="{unsatisfied: item.unsatisfied, selected: item.selected}"
+            class="ratingTag"
+            @tap="tagSelected(index)">
+            {{item.name}}({{item.count}})
+          </v-touch>
+        </ul>
+      </section>
+      <section class="ratingList">
+        <ul class="ulRatingList">
+          <li v-for="(item, index) in getRatingListData" :key="index" class="itemRating">
+            <img v-if="item.avatar" :src="`${imgBaseUrl}${item.avatar}.jpeg`" alt="">
+            <img v-else :src="userAvatarDefault" alt="">
+            <section class="ratingContent">
+              <header class="ratingUser">
+                <section class="userScore">
+                  <span class="username">{{item.username}}</span>
+                  <section class="score">
+                    <span class="star"></span>
+                    <span class="timeSpent">{{item.time_spent_desc}}</span>
+                  </section>
                 </section>
-              </section>
-              <time class="ratingDate">{{item.rated_at}}</time>
-            </header>
-            <div class="ratingDetail">
-              <ul class="ulRatingImg">
-                <li v-for="rating in item.item_ratings" v-if="rating.image_hash" :key="rating.food_id" class="itemRatingImg">
-                  <img :src="`${imgBaseUrl}${rating.image_hash}.jpeg`" alt="">
-                </li>
-              </ul>
-              <ul class="ulFoodId">
-                <li v-for="rating in item.item_ratings" :key="rating.food_id" class="itemFoodId">
-                  {{rating.food_name}}
-                </li>  
-              </ul>
-            </div>
-          </section>
-        </li>
-      </ul>
-    </section>
-  </div>
-  <transition name="pullend">
-    <div v-if="arriveBtm" class="without">没有了</div>
-  </transition>
-</scroll>
+                <time class="ratingDate">{{item.rated_at}}</time>
+              </header>
+              <div class="ratingDetail">
+                <ul class="ulRatingImg">
+                  <li v-for="rating in item.item_ratings" v-if="rating.image_hash" :key="rating.food_id" class="itemRatingImg">
+                    <img :src="`${imgBaseUrl}${rating.image_hash}.jpeg`" alt="">
+                  </li>
+                </ul>
+                <ul class="ulFoodId">
+                  <li v-for="rating in item.item_ratings" :key="rating.food_id" class="itemFoodId">
+                    {{rating.food_name}}
+                  </li>  
+                </ul>
+              </div>
+            </section>
+          </li>
+        </ul>
+      </section>
+    </div>
+    <loading v-if="loading"></loading>
+  </scroll>
 </template>
 
 <script>
@@ -91,7 +89,8 @@ export default {
   name: 'evaluate',
 
   components: {
-    scroll: async () => import('../../../components/common/scroll')
+    scroll: async () => import('../../../components/common/scroll'),
+    loading: async () => import('../../../components/common/loading')
   },
 
   filters: {
@@ -119,7 +118,7 @@ export default {
       imgBaseUrl,
       userAvatarDefault,
       tagSelectedMark: 0,
-      arriveBtm: false
+      loading: false
     }
   },
 
@@ -176,9 +175,11 @@ export default {
 
     async getRatingListGet () {
       try {
+        this.loading = true
         let res = await getRatingList(this.id, this.offset, this.tagName)
         if (res.length < 10) this.ratingDataLoad = false
         this.getRatingListData = this.getRatingListData.concat(res)
+        this.loading = false
       } catch (e) {
         throw new Error(e)
       }

@@ -130,6 +130,7 @@
         @tap="screenTap">
       </v-touch>
     </transition>
+    <loading v-if="loading"></loading>
   </div>
 </template>
 
@@ -145,7 +146,8 @@ export default {
   components: {
     TopBack, // 因为要获取高度，所以采取同步写法
     ShopList: async () => import('../components/common/ShopList'),
-    scroll: async () => import('../components/common/scroll')
+    scroll: async () => import('../components/common/scroll'),
+    loading: async () => import('../components/common/loading')
   },
 
   data () {
@@ -204,7 +206,8 @@ export default {
           name: '评分最高',
           sortord: 'rating'
         }
-      ]
+      ],
+      loading: false
     }
   },
 
@@ -243,6 +246,7 @@ export default {
   methods: {
     async shopListDataGet () { // 商铺的列表
       try {
+        this.loading = true
         let res = await shopList(
           this.latitude,
           this.longitude,
@@ -252,8 +256,9 @@ export default {
           this.orderBy,
           this.deliveryMode,
           this.supportIds
-          )
+        )
         this.shopListData = res
+        this.loading = false
       } catch (e) {
         throw new Error(e)
       }
@@ -279,7 +284,6 @@ export default {
       try {
         let res = await foodDelivery(this.latitude, this.longitude)
         this.foodDeliveryData = res
-        console.log(res)
       } catch (e) {
         throw new Error(e)
       }
@@ -431,15 +435,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .2s ease-out;
-}
-.fade-enter-to, .fade-leave {
-  opacity: 1;
-}
 .blackScreen {
   width: 100%;
   position: fixed;
