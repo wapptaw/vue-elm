@@ -32,9 +32,9 @@ export default {
 
   data () {
     return {
-      posX: 0,
-      posY: 0,
-      speed: 10 // 速率
+      posX: null,
+      posY: null,
+      speed: -10 // 速率
     }
   },
 
@@ -46,11 +46,11 @@ export default {
     pos () {
       let posYGet = this.posEquation(this.start, this.end)
       this.posX = this.start.x
-      this.posY = this.start.y
       let timer = setInterval(() => {
-        this.posX += this.start.x - this.speed
-        if (this.posX < this.end.x) {
+        this.posX += this.speed
+        if (this.posX <= this.end.x) {
           this.posX = this.end.x
+          this.$emit('ballMoveFinish')
           clearInterval(timer)
         }
         this.posY = posYGet(this.posX)
@@ -58,9 +58,9 @@ export default {
     },
 
     posEquation (start, end) { // 求抛物线函数（采用顶点式：y=a(x-h)^2+k (h是顶点坐标的x,k是顶点坐标的y)）
-      let a = (end.x - start.y) / (end.x - start.x)^2
+      let a = (end.y - start.y) / Math.pow((end.x - start.x), 2)
       return function (posX) {
-        return a * (posX - start.x)^2 + start.y // 根据x坐标求出y坐标
+        return a * Math.pow((posX - start.x), 2) + start.y // 根据x坐标求出y坐标
       }
     }
   }
@@ -70,10 +70,10 @@ export default {
 <style lang="scss" scoped>
   .ball {
     position: fixed;
-    width: .1rem;
-    height: .1rem;
+    width: .15rem;
+    height: .15rem;
     background-color: #147da7;
-    border-radius: .05rem;
+    border-radius: .1rem;
   }
 </style>
 

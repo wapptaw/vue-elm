@@ -46,7 +46,7 @@
                     <span v-if="food.specfoods[0].selectedNum > 0 && food.specfoods.length === 1" class="foodSize">{{food.specfoods[0].selectedNum}}</span>
                   </transition>
                   <v-touch v-if="food.specfoods.length > 1" tag="span" class="foodSelect" @tap="specSelectShow(index, foodIndex)">选择</v-touch>
-                  <v-touch v-else tag="span" class="foodAdd" @tap="foodAdd(index, foodIndex, $event)">+</v-touch>
+                  <v-touch v-else tag="span" class="foodAdd" @tap="foodAdd($event, index, foodIndex)">+</v-touch>
                 </section>
               </footer>
             </div>
@@ -76,7 +76,7 @@
                 <transition name="fade">
                   <span v-if="specData[specMark].selectedNum > 0" class="specNum">{{specData[specMark].selectedNum}}</span>
                 </transition>
-                <v-touch tag="span" class="specAdd" @tap="foodAdd">+</v-touch>
+                <v-touch tag="span" class="specAdd" @tap="foodAdd($event)">+</v-touch>
               </section>
             </footer>
           </section>
@@ -106,7 +106,13 @@
       </section>
     </transition>
     <footer class="cartView" ref="cartView">
-      <v-touch tag="span" class="foodNum" ref="foodNum" @tap="carShow">购买数：{{sum.foodNum}}</v-touch>
+      <v-touch
+        tag="span"
+        class="foodNum"
+        :class="{ballMoveFin: foodNumShake}"
+        ref="foodNum"
+        @tap="carShow"
+        @animationend.native="shakeEnd">购买数：{{sum.foodNum}}</v-touch>
       <span class="totalPrices">￥{{sum.totalPrices}}</span>
       <router-link
         v-if="sum.totalPrices >= 20"
@@ -120,6 +126,12 @@
     </footer>
     <pop-up v-if="popup" warnMessage="请先登录" @warnConfirm="warnConfirm" class="popup"></pop-up>
     <loading v-if="loading"></loading>
+    <ball-move
+      v-if="ballShow"
+      :start="startPos"
+      :end="endPos"
+      class="ballMove"
+      @ballMoveFinish="ballMoveFinish"></ball-move>
   </div>
 </template>
 
@@ -134,7 +146,8 @@ export default {
   components: {
     MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
     PopUp: async () => import('../../../components/common/PopUp'),
-    loading: async () => import('../../../components/common/loading')
+    loading: async () => import('../../../components/common/loading'),
+    BallMove: async () => import('../../../components/common/BallMove')
   },
 
   props: {
@@ -151,14 +164,21 @@ export default {
       imgBaseUrl2,
       footerHeight: '',
       specShow: false,
-      specData: '',
+      specData: '', // 规格数据
       shadowShow: false,
       specMark: 0, // 记录选中的spec选项的序号
       carListShow: false,
       tier: 99, // 遮罩层级
       popup: false,
       loading: false,
-      endPos: '' // 终点坐标
+      startPos: {}, // 起点坐标
+      endPos: {}, // 终点坐标
+      ballShow: false,
+      sum: { // 总计
+        foodNum: 0,
+        totalPrices: 0
+      },
+      foodNumShake: false // 抖动开关
     }
   },
 
@@ -206,20 +226,7 @@ export default {
       return allFoods
     },
 
-    sum () { // 总计
-      let foodNum = 0
-      let totalPrices = 0
-      for (let v of this.allFoods) {
-        foodNum += v.selectedNum
-        totalPrices += v.selectedNum * v.price
-      }
-      return {
-        foodNum,
-        totalPrices
-      }
-    },
-
-    minDelivery () {
+    minDelivery () { // 与最小配送额度的差距
       if (this.sum.totalPrices < 20) {
         return 20 - this.sum.totalPrices
       }
@@ -234,7 +241,7 @@ export default {
   },
 
   watch: {
-    allFoods (newV) {
+    allFoods (newV) { // 监听购物车变化，如果购物车清空就关闭购物车和遮罩
       if (newV.length === 0 && !this.specShow) {
         this.shadowShow = false
         this.carListShow = false
@@ -244,18 +251,16 @@ export default {
 
   mounted () {
     this.foodMenuGet()
-    this.$nextTick(() => {
-      this.footerHeight = this.$refs.cartView.offsetHeight
-    })
+    this.footerHeight = this.$refs.cartView.offsetHeight
     this.endPosGet()
   },
 
-  beforeRouteLeave (to, from, next) {
+  beforeRouteLeave (to, from, next) { // 离开此页前保存数据并判断
     this.foodMenuDataSave({
       foodMenuData: this.foodMenuData,
       shopId: this.id
     })
-    if (to.name === 'orderConfirm' && !this.userInfo) {
+    if (to.name === 'orderConfirm' && !this.userInfo) { // 判断是否登录
       this.tier = 101
       this.popup = true
       next(false)
@@ -265,7 +270,7 @@ export default {
   },
 
   methods: {
-    async foodMenuGet () {
+    async foodMenuGet () { // 食物数据获取
       try {
         if (this.foodMenu[this.id]) {
           this.foodMenuData = this.foodMenu[this.id]
@@ -289,7 +294,7 @@ export default {
       }
     },
 
-    menuSelected (index) {
+    menuSelected (index) { // 食物种类选择
       this.foodMenuData.forEach((val, ind) => {
         if (index === ind) {
           val.menuSelected = true
@@ -300,7 +305,20 @@ export default {
       document.getElementById(index).scrollIntoView()
     },
 
-    foodAdd (index, foodIndex, $event) {
+    sumGet () { // 总计
+      let foodNum = 0
+      let totalPrices = 0
+      for (let v of this.allFoods) {
+        foodNum += v.selectedNum
+        totalPrices += v.selectedNum * v.price
+      }
+      this.sum = {
+        foodNum,
+        totalPrices
+      }
+    },
+
+    foodAdd ($event, index, foodIndex) { // 增加购物
       let specfoods
       if (this.specData) {
         specfoods = this.specData
@@ -308,10 +326,31 @@ export default {
         specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
       }
       specfoods[this.specMark].selectedNum ++
-      console.log($event.center) // 顶点坐标
+      this.startPos = $event.center // 起点坐标
+      this.ballShow = true
     },
 
-    foodReduce (index, foodIndex) {
+    endPosGet () { // 终点位置
+      let endPos = {}
+      let rect = this.$refs.foodNum.$el.getBoundingClientRect()
+      let x = rect.x
+      let y = rect.y
+      endPos.x = x + 70 // 终点位置调整
+      endPos.y = y
+      this.endPos = endPos
+    },
+
+    ballMoveFinish () { // 运动结束
+      this.sumGet()
+      this.ballShow = false
+      this.foodNumShake = true
+    },
+
+    shakeEnd () { // 结束抖动
+      this.foodNumShake = false
+    },
+
+    foodReduce (index, foodIndex) { // 减少购物数
       let specfoods
       if (this.specData) {
         specfoods = this.specData
@@ -321,9 +360,10 @@ export default {
       if (specfoods[this.specMark].selectedNum > 0) {
         specfoods[this.specMark].selectedNum --
       }
+      this.sumGet()
     },
 
-    specSelectShow (index, foodIndex) {
+    specSelectShow (index, foodIndex) { // 显示规格选项卡
       let specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
       for (let spec of specfoods) {
         spec.selected = false
@@ -335,7 +375,7 @@ export default {
       this.tier = 101
     },
 
-    shadowClose () {
+    shadowClose () { // 点击遮罩
       this.shadowShow = false
       this.specShow = false
       this.specMark = 0
@@ -343,7 +383,7 @@ export default {
       this.carListShow = false
     },
 
-    specSelect (specIndex) {
+    specSelect (specIndex) { // 具体规格选择
       this.specMark = specIndex
       this.specData.forEach((val, index) => {
         if (specIndex === index) {
@@ -354,23 +394,26 @@ export default {
       })
     },
 
-    carClear () {
+    carClear () { // 清空购物车
       for (let v of this.allFoods) {
         v.selectedNum = 0
       }
+      this.sumGet()
     },
 
-    carReduce (index) {
+    carReduce (index) { // 减少购物车商品数量
       if (this.allFoods[index].selectedNum > 0) {
         this.allFoods[index].selectedNum --
       }
+      this.sumGet()
     },
 
-    carAdd (index) {
+    carAdd (index) { // 增加购物车商品数量
       this.allFoods[index].selectedNum ++
+      this.sumGet()
     },
 
-    carShow () {
+    carShow () { // 打开购物车
       if (this.allFoods.length > 0 && !this.carListShow) {
         this.carListShow = true
         this.shadowShow = true
@@ -381,23 +424,9 @@ export default {
       }
     },
 
-    warnConfirm () {
+    warnConfirm () { // 错误警告
       this.popup = false
       this.$router.push({name: 'login'})
-    },
-
-    shopAddAnimation () {
-      //
-    },
-
-    endPosGet () {
-      // let endPos = {}
-      // let x = this.$refs.foodNum.clientX
-      // let y = this.$refs.foodNum.clientY
-      // endPos.x = x
-      // endPos.y = y
-      // this.endPos = endPos
-      console.log(this.$refs.foodNum)
     },
 
     ...mapMutations([
@@ -650,6 +679,10 @@ export default {
     }
     .foodNum {
       color: #277be9;
+      transform: scale(1);
+    }
+    .ballMoveFin {
+      animation: shake .5s;
     }
     .totalPrices {
       color: #ee4d0d;
@@ -738,6 +771,20 @@ export default {
   }
   .popup {
     z-index: 102;
+  }
+  .ballMove {
+    z-index: 103;
+  }
+  @keyframes shake {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 </style>
 
