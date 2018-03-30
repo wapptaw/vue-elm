@@ -89,8 +89,8 @@ export default {
   name: 'evaluate',
 
   components: {
-    scroll: async () => import('../../../components/common/scroll'),
-    loading: async () => import('../../../components/common/loading')
+    scroll: () => import('../../../components/common/scroll'),
+    loading: () => import('../../../components/common/loading')
   },
 
   filters: {

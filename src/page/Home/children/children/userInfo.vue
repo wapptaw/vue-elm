@@ -99,7 +99,7 @@ export default {
     position: fixed;
     left: 0;
     top: 0;
-    background-color: #d6d6d6;
+    background-color: #ebebeb;
     width: 100%;
     height: 100%;
     .userInfo {
@@ -153,7 +153,7 @@ export default {
       margin: 0 auto;
       text-align: center;
       line-height: .4rem;
-      background-color: #b83a3a;
+      background-color: #c94848;
       border-radius: .05rem;
       margin-top: .1rem;
     }

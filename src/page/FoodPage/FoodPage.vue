@@ -29,12 +29,11 @@
     <div class="shopContent">
       <ul class="title" ref="title">
         <router-link
-          tag="li"
-          :to="{name: item.className}"
           v-for="item of titles"
           :key="item.className"
-          :class="item.className">
-          <span :class="{selected: item.selected}">{{item.title}}</span>
+          tag="li"
+          :to="{name: item.className}">
+          <span>{{item.title}}</span>
         </router-link>
       </ul>
       <transition name="fade" mode="out-in">
@@ -71,8 +70,8 @@ export default {
   name: 'FoodPage',
 
   components: {
-    TopBack: async () => import('../../components/common/TopBack'),
-    MatteOpacity: async () => import('../../components/common/MatteOpacity')
+    TopBack: () => import('../../components/common/TopBack'),
+    MatteOpacity: () => import('../../components/common/MatteOpacity')
   },
 
   props: {
@@ -89,9 +88,9 @@ export default {
       detailsHeight: '',
       actives: false,
       titles: [
-        {title: '点餐', className: 'order', selected: true},
-        {title: '评价', className: 'evaluate', selected: false},
-        {title: '商家', className: 'merchant', selected: false}
+        {title: '点餐', className: 'order'},
+        {title: '评价', className: 'evaluate'},
+        {title: '商家', className: 'merchant'}
       ]
     }
   },
@@ -118,17 +117,6 @@ export default {
 
   mounted () {
     this.shopDetailsDataGet()
-  },
-
-  beforeRouteUpdate (to, from, next) {
-    for (let v of this.titles) {
-      if (to.name === v.className) {
-        v.selected = true
-      } else {
-        v.selected = false
-      }
-    }
-    next()
   },
 
   methods: {
@@ -196,12 +184,11 @@ export default {
       position: absolute;
       padding: 0 .1rem;
       display: flex;
-      background-color: rgba(0, 0, 0, 0.5);
       width: 100%;
       box-sizing: border-box;
       .back {
         position: fixed;
-        left: 0;
+        left:.1rem;
         top: 0;
         color: rgba(255, 255, 255, 0.6);
         font-size: .25rem;
@@ -253,28 +240,21 @@ export default {
         color: #181818;
         flex: auto;
       }
-      .selected {
-        position: relative;
-        &::after {
-          content: '';
-          width: 100%;
-          height: 3px;
-          background-color: #1666b1;
-          position: absolute;
-          left: 0;
-          bottom: -0.06rem;
+      .router-link-active {
+        span {
+          position: relative;
+          &::after {
+            content: '';
+            width: 100%;
+            height: 3px;
+            background-color: #1666b1;
+            position: absolute;
+            left: 0;
+            bottom: -0.06rem;
+          }
         }
       }
     }
-  }
-  .fullScreen {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 99;
-    background-color: rgba(0, 0, 0, 0.7);
-    top: 0;
-    left: 0;
   }
   .activesAll {
     background-color: #e0e0e0;

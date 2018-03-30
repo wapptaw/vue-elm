@@ -47,11 +47,11 @@ export default {
   name: 'shopSearch',
 
   components: {
-    TopBack: async () => import('../../../components/common/TopBack'),
-    SearchBox: async () => import('../../../components/common/SearchBox'),
-    ShopList: async () => import('../../../components/common/ShopList'),
-    scroll: async () => import('../../../components/common/scroll'),
-    loading: async () => import('../../../components/common/loading')
+    TopBack: () => import('../../../components/common/TopBack'),
+    SearchBox: () => import('../../../components/common/SearchBox'),
+    ShopList: () => import('../../../components/common/ShopList'),
+    scroll: () => import('../../../components/common/scroll'),
+    loading: () => import('../../../components/common/loading')
   },
 
   props: {
@@ -147,7 +147,7 @@ export default {
 .searchHistory {
   background-color: #e9e9e9;
   .title {
-    margin-left: .1rem;
+    padding-left: .1rem;
     font-size: .14rem;
     color: #242424;
     background-color: #fff;

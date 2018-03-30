@@ -30,9 +30,12 @@
       <div
         ref="search"
         class="search">
-        <router-link to="ShopSearch">
-          <input type="button" value="开始寻找美食">
-        </router-link>
+        <router-link
+          to="ShopSearch"
+          event="touchend"
+          tag="input"
+          type="button"
+          value="开始寻找美食" />
       </div>
       <div>
         <nav class="nav">
@@ -99,10 +102,10 @@ export default {
   name: 'TakeOut',
 
   components: {
-    ShopList: async () => import('../../../components/common/ShopList'), // 异步加载组件
-    scroll: async () => import('../../../components/common/scroll'),
-    PromptBox: async () => import('../../../components/common/PromptBox'),
-    loading: async () => import('../../../components/common/loading')
+    ShopList: () => import('../../../components/common/ShopList'), // 异步加载组件
+    scroll: () => import('../../../components/common/scroll'),
+    PromptBox: () => import('../../../components/common/PromptBox'),
+    loading: () => import('../../../components/common/loading')
   },
 
   data () {
@@ -406,7 +409,7 @@ export default {
     z-index: 1;
     input {
       display: block;
-      color: rgb(80, 80, 80);
+      color: #505050;
       background-color: #fff;
       width: 100%;
       height: .4rem;

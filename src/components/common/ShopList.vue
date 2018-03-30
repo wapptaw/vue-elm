@@ -77,7 +77,7 @@ export default {
   align-items: center;
 }
 .ulShopList {
-  background-color: #dadada;
+  background-color: #f0f0f0;
   padding-top: .05rem;
   .liShopList {
     @extend %spaceBetween;

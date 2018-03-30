@@ -16,7 +16,7 @@ export default {
   name: 'home',
 
   components: {
-    BottomNav: async () => import('../../components/common/BottomNav')
+    BottomNav: () => import('../../components/common/BottomNav')
   },
 
   data () {

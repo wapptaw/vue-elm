@@ -37,7 +37,7 @@ export default {
 
   components: {
     TopBack,
-    loading: async () => import('../../components/common/loading')
+    loading: () => import('../../components/common/loading')
   },
 
   data () {

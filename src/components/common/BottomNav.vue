@@ -5,7 +5,6 @@
         v-for="item in navData"
         :key="item.name"
         tag="div"
-        :class="{selected: routerName === item.routerName}"
         class="foodItem"
         :to="{name: item.routerName}">
         {{item.name}}
@@ -43,12 +42,6 @@ export default {
     }
   },
 
-  computed: {
-    routerName () {
-      return this.$route.name
-    }
-  },
-
   mounted () {
     this.$emit('heightGet', 50)
   },
@@ -67,7 +60,7 @@ export default {
     justify-content: space-around;
     align-items: center;
     width: 100%;
-    background-color: #e0e0e0;
+    background-color: #ececec;
     height: .5rem;
     .foodItem {
       font-size: .12rem;
@@ -81,7 +74,7 @@ export default {
       background-color: #fff;
       border-radius: .2rem;
     }
-    .selected {
+    .router-link-active { // 路由激活后默认使用的类名
       color: #175cb6;
       font-weight: bold;
     }

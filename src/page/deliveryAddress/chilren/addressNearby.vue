@@ -32,7 +32,7 @@ export default {
   components: {
     TopBack,
     SearchBox,
-    loading: async () => import('../../../components/common/loading')
+    loading: () => import('../../../components/common/loading')
   },
 
   data () {

@@ -51,7 +51,7 @@ export default {
   name: 'shopSafe',
 
   components: {
-    TopBack: async () => import('../../../../components/common/TopBack')
+    TopBack: () => import('../../../../components/common/TopBack')
   },
 
   data () {

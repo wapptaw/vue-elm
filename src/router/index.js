@@ -1,29 +1,31 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import home from '../page/Home/home'
-import TakeOut from '../page/Home/children/TakeOut'
-import ShopSearch from '../page/Home/children/ShopSearch'
-import OrderForm from '../page/Home/children/OrderForm'
-import user from '../page/Home/children/user'
-import AddressSearch from '../page/city/AddressSearch'
-import CitySelect from '../page/city/CitySelect'
-import FoodCategory from '../page/FoodCategory'
-import FoodPage from '../page/FoodPage/FoodPage'
-import order from '../page/FoodPage/children/order'
-import evaluate from '../page/FoodPage/children/evaluate'
-import merchant from '../page/FoodPage/children/merchant'
-import shopSafe from '../page/FoodPage/children/children/shopSafe'
-import OrderConfirm from '../page/formPay/OrderConfirm'
-import login from '../page/login/login'
-import userInfo from '../page/Home/children/children/userInfo'
-import resetPassword from '../page/forget/resetPassword'
-import deliveryAddress from '../page/deliveryAddress/deliveryAddress'
-import addressAdd from '../page/deliveryAddress/chilren/addressAdd'
-import addressNearby from '../page/deliveryAddress/chilren/addressNearby'
-import remark from '../page/formPay/children/remark'
-import invoice from '../page/formPay/children/invoice'
-import payPage from '../page/formPay/children/payPage'
-import orderFormDetail from '../page/Home/children/children/orderFormDetail'
+
+const home = () => import('../page/Home/home')
+const TakeOut = () => import('../page/Home/children/TakeOut')
+const ShopSearch = () => import('../page/Home/children/ShopSearch')
+const OrderForm = () => import('../page/Home/children/OrderForm')
+const user = () => import('../page/Home/children/user')
+const AddressSearch = () => import('../page/city/AddressSearch')
+const CitySelect = () => import('../page/city/CitySelect')
+const FoodCategory = () => import('../page/FoodCategory')
+const FoodPage = () => import('../page/FoodPage/FoodPage')
+const order = () => import('../page/FoodPage/children/order')
+const evaluate = () => import('../page/FoodPage/children/evaluate')
+const merchant = () => import('../page/FoodPage/children/merchant')
+const shopSafe = () => import('../page/FoodPage/children/children/shopSafe')
+const OrderConfirm = () => import('../page/formPay/OrderConfirm')
+const login = () => import('../page/login/login')
+const userInfo = () => import('../page/Home/children/children/userInfo')
+const resetPassword = () => import('../page/forget/resetPassword')
+const deliveryAddress = () => import('../page/deliveryAddress/deliveryAddress')
+const addressAdd = () => import('../page/deliveryAddress/chilren/addressAdd')
+const addressNearby = () => import('../page/deliveryAddress/chilren/addressNearby')
+const remark = () => import('../page/formPay/children/remark')
+const invoice = () => import('../page/formPay/children/invoice')
+const payPage = () => import('../page/formPay/children/payPage')
+const orderFormDetail = () => import('../page/Home/children/children/orderFormDetail')
+
 Vue.use(Router)
 
 export default new Router({

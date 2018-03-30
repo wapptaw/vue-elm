@@ -127,11 +127,12 @@
     <pop-up v-if="popup" warnMessage="请先登录" @warnConfirm="warnConfirm" class="popup"></pop-up>
     <loading v-if="loading"></loading>
     <ball-move
-      v-if="ballShow"
-      :start="startPos"
-      :end="endPos"
+      v-for="item in ballMoveList"
+      :key="item.key"
+      :start="item.startPos"
+      :end="item.endPos"
       class="ballMove"
-      @ballMoveFinish="ballMoveFinish"></ball-move>
+      @ballMoveFinish="ballMoveFinish(item.key)"></ball-move>
   </div>
 </template>
 
@@ -144,10 +145,10 @@ export default {
   name: 'order',
 
   components: {
-    MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
-    PopUp: async () => import('../../../components/common/PopUp'),
-    loading: async () => import('../../../components/common/loading'),
-    BallMove: async () => import('../../../components/common/BallMove')
+    MatteOpacity: () => import('../../../components/common/MatteOpacity'),
+    PopUp: () => import('../../../components/common/PopUp'),
+    loading: () => import('../../../components/common/loading'),
+    BallMove: () => import('../../../components/common/BallMove')
   },
 
   props: {
@@ -171,14 +172,15 @@ export default {
       tier: 99, // 遮罩层级
       popup: false,
       loading: false,
-      startPos: {}, // 起点坐标
+      ballMoveList: [], // 球列表
+      key: 0,
       endPos: {}, // 终点坐标
-      ballShow: false,
       sum: { // 总计
         foodNum: 0,
         totalPrices: 0
       },
-      foodNumShake: false // 抖动开关
+      foodNumShake: false, // 抖动开关
+      lastAddDate: '' // 保存上次增加购物的日期
     }
   },
 
@@ -252,6 +254,7 @@ export default {
   mounted () {
     this.foodMenuGet()
     this.footerHeight = this.$refs.cartView.offsetHeight
+    this.sumGet()
     this.endPosGet()
   },
 
@@ -326,8 +329,14 @@ export default {
         specfoods = this.foodMenuData[index].foods[foodIndex].specfoods
       }
       specfoods[this.specMark].selectedNum ++
-      this.startPos = $event.center // 起点坐标
-      this.ballShow = true
+      let nowDate = new Date()
+      if (this.lastAddDate && nowDate - this.lastAddDate < 500) return // 限制移动球的数量
+      this.ballMoveList.push({ // 增加移动球
+        startPos: $event.center,
+        endPos: this.endPos,
+        key: this.key++
+      })
+      this.lastAddDate = nowDate
     },
 
     endPosGet () { // 终点位置
@@ -340,9 +349,14 @@ export default {
       this.endPos = endPos
     },
 
-    ballMoveFinish () { // 运动结束
+    ballMoveFinish (key) { // 运动结束
+      for (let i = 0, len = this.ballMoveList.length; i < len; i++) {
+        if (this.ballMoveList[i].key === key) {
+          this.ballMoveList.splice(i, 1)
+          break
+        }
+      }
       this.sumGet()
-      this.ballShow = false
       this.foodNumShake = true
     },
 
@@ -381,6 +395,7 @@ export default {
       this.specMark = 0
       this.specData = ''
       this.carListShow = false
+      this.popup = false
     },
 
     specSelect (specIndex) { // 具体规格选择
@@ -682,7 +697,7 @@ export default {
       transform: scale(1);
     }
     .ballMoveFin {
-      animation: shake .5s;
+      animation: shake .3s;
     }
     .totalPrices {
       color: #ee4d0d;

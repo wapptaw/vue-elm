@@ -123,8 +123,8 @@ export default {
 
   components: {
     TopBack,
-    MatteOpacity: async () => import('../../components/common/MatteOpacity'),
-    PopUp: async () => import('../../components/common/PopUp')
+    MatteOpacity: () => import('../../components/common/MatteOpacity'),
+    PopUp: () => import('../../components/common/PopUp')
   },
 
   filters: {

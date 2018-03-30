@@ -145,9 +145,9 @@ export default {
 
   components: {
     TopBack, // 因为要获取高度，所以采取同步写法
-    ShopList: async () => import('../components/common/ShopList'),
-    scroll: async () => import('../components/common/scroll'),
-    loading: async () => import('../components/common/loading')
+    ShopList: () => import('../components/common/ShopList'),
+    scroll: () => import('../components/common/scroll'),
+    loading: () => import('../components/common/loading')
   },
 
   data () {

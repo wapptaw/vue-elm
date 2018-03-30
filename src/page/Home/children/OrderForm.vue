@@ -57,9 +57,9 @@ export default {
 
   components: {
     TopBack,
-    MatteOpacity: async () => import('../../../components/common/MatteOpacity'),
-    PopUp: async () => import('../../../components/common/PopUp'),
-    loading: async () => import('../../../components/common/loading')
+    MatteOpacity: () => import('../../../components/common/MatteOpacity'),
+    PopUp: () => import('../../../components/common/PopUp'),
+    loading: () => import('../../../components/common/loading')
   },
 
   filters: {
@@ -155,7 +155,7 @@ export default {
     align-items: center;
   }
   .orderForm {
-    background-color: #dfdfdf;
+    background-color: #ebebeb;
     overflow: auto;
     .orderFormUl {
       .orderFormLi {
